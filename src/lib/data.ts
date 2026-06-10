@@ -166,6 +166,9 @@ export const INCORRECT_MESSAGES = [
 export const PARENT_MESSAGE =
   "Durante vacaciones los alumnos podrán practicar matemáticas de lunes a viernes con misiones cortas. Cada día resolverán operaciones básicas y problemas razonados para reforzar suma, resta, multiplicación, división, fracciones y decimales.";
 
+/** Points lost when the first attempt at an exercise is wrong. */
+export const WRONG_PENALTY = 2;
+
 export const PRACTICE_TOPICS: Topic[] = [
   "sumas",
   "restas",

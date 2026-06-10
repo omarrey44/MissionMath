@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Lightbulb, Check, ArrowRight, RotateCcw } from "lucide-react";
 import type { Exercise } from "@/lib/types";
 import { checkAnswer } from "@/lib/generators";
-import { CORRECT_MESSAGES, INCORRECT_MESSAGES } from "@/lib/data";
+import { CORRECT_MESSAGES, INCORRECT_MESSAGES, WRONG_PENALTY } from "@/lib/data";
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -53,21 +53,20 @@ export function ExerciseCard({
     const nextAttempts = attempts + 1;
     setAttempts(nextAttempts);
 
+    // The FIRST attempt decides points and accuracy. Retrying afterwards
+    // is for learning: it does not recover the lost points or precision.
+    if (!reported.current) {
+      reported.current = true;
+      onResult(allCorrect);
+    }
+
     if (allCorrect) {
       setStatus("correct");
       setFeedback(pickMsg(CORRECT_MESSAGES));
-      if (!reported.current) {
-        reported.current = true;
-        onResult(true);
-      }
     } else if (nextAttempts >= 2) {
       // After 2 failed attempts, reveal the explanation
       setStatus("revealed");
       setFeedback("No pasa nada. Mira la explicación y aprende para la próxima.");
-      if (!reported.current) {
-        reported.current = true;
-        onResult(false);
-      }
     } else {
       setStatus("incorrect");
       setFeedback(pickMsg(INCORRECT_MESSAGES));
@@ -166,6 +165,16 @@ export function ExerciseCard({
             >
               {status === "correct" ? "🎉 " : status === "revealed" ? "🤗 " : "💪 "}
               {feedback}
+              {(status === "incorrect" || status === "revealed") &&
+                attempts === 1 && (
+                  <motion.span
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="ml-2 inline-block rounded-full bg-error/20 px-2.5 py-0.5 text-sm"
+                  >
+                    −{WRONG_PENALTY} puntos
+                  </motion.span>
+                )}
             </motion.div>
           )}
         </AnimatePresence>

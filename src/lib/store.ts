@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { BADGES } from "./data";
+import { BADGES, WRONG_PENALTY } from "./data";
 import { todayKey, yesterdayKey } from "./date";
 import type { Difficulty, Exercise, Topic } from "./types";
 
@@ -139,7 +139,8 @@ export const useProgress = create<ProgressState>()(
         const next = {
           exercisesSolved: s.exercisesSolved + 1,
           correctAnswers: s.correctAnswers + (correct ? 1 : 0),
-          points: s.points + (correct ? points : 0),
+          // Wrong answers cost points, but the total never goes below zero
+          points: Math.max(0, s.points + (correct ? points : -WRONG_PENALTY)),
           topicCorrect,
           streak,
           lastActiveDate: today,

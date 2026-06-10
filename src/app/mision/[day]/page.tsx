@@ -253,6 +253,10 @@ export default function MissionPage({ params }: { params: { day: string } }) {
             Sugerencia para la semana {currentWeek}:{" "}
             {DIFF_OPTIONS.find((o) => o.value === difficultyForWeek(currentWeek))?.label}
           </p>
+          <p className="mt-1 text-xs text-tinta/40">
+            Ojo: cada respuesta equivocada resta 2 puntos. ¡Piensa bien antes de
+            revisar!
+          </p>
         </motion.div>
       </div>
     );
