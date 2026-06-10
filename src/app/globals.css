@@ -2,26 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+body {
+  color: #1e2a4a;
+  background-color: #fff9ee;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Notebook grid texture over the cream background */
+.bg-notebook {
+  background-image: linear-gradient(rgba(43, 111, 227, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(43, 111, 227, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-azul px-6 py-3.5 font-display text-lg text-white shadow-boton transition-transform active:translate-y-0.5 active:shadow-none hover:bg-azul-dark focus-visible:outline focus-visible:outline-4 focus-visible:outline-amarillo;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-amarillo px-6 py-3.5 font-display text-lg text-tinta shadow-boton transition-transform active:translate-y-0.5 active:shadow-none hover:bg-amarillo-dark focus-visible:outline focus-visible:outline-4 focus-visible:outline-azul;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-azul/30 bg-white px-5 py-3 font-display text-azul transition-colors hover:border-azul hover:bg-cielo focus-visible:outline focus-visible:outline-4 focus-visible:outline-amarillo;
+  }
+  .card {
+    @apply rounded-3xl bg-white shadow-card;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* Print styles for the teacher summary */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
   }
 }

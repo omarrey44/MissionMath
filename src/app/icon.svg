@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Rounded app-style background -->
+  <rect width="64" height="64" rx="14" fill="#2B6FE3"/>
+  <!-- School building -->
+  <rect x="14" y="30" width="36" height="22" rx="2" fill="#FFF9EE"/>
+  <!-- Roof -->
+  <path d="M10 31 L32 16 L54 31 Z" fill="#FF7B54"/>
+  <!-- Bell tower circle -->
+  <circle cx="32" cy="26" r="3.5" fill="#FFC93C"/>
+  <!-- Door -->
+  <rect x="27" y="38" width="10" height="14" rx="2" fill="#2B6FE3"/>
+  <!-- Windows -->
+  <rect x="18" y="36" width="6" height="6" rx="1" fill="#5B93F0"/>
+  <rect x="40" y="36" width="6" height="6" rx="1" fill="#5B93F0"/>
+  <!-- Flag -->
+  <rect x="49" y="14" width="1.8" height="12" fill="#FFF9EE"/>
+  <path d="M50.8 14 L58 16.5 L50.8 19 Z" fill="#FFC93C"/>
+</svg>

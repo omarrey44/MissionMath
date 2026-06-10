@@ -1,101 +1,117 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Rocket, Dumbbell } from "lucide-react";
+import { WeeklyCalendar } from "@/components/WeeklyCalendar";
+import { StudentStats } from "@/components/StudentStats";
+import { NamePrompt } from "@/components/NamePrompt";
+import { useProgress } from "@/lib/store";
+import { DAYS } from "@/lib/data";
+
+export default function HomePage() {
+  const { studentName, completedDays, currentWeek, hasHydrated } = useProgress();
+
+  // First incomplete day of the current week = today's mission
+  const nextDay =
+    DAYS.find((d) => !completedDays[`w${currentWeek}-${d.slug}`]) ?? DAYS[0];
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="flex flex-col gap-10">
+      <NamePrompt />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      {/* Hero */}
+      <section className="card relative overflow-hidden bg-gradient-to-br from-cielo via-white to-amarillo-light/40 p-8 md:p-12">
+        <div className="relative z-10 max-w-xl">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="font-display text-4xl font-extrabold leading-tight text-tinta md:text-5xl"
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Misión Matemática <span className="text-azul">de Vacaciones</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mt-3 text-lg text-tinta/70"
           >
-            Read our docs
-          </a>
+            Practica unos minutos al día, gana estrellas y mejora tus habilidades
+            matemáticas.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-6 flex flex-wrap gap-3"
+          >
+            <Link href={`/mision/${nextDay.slug}`} className="btn-primary">
+              <Rocket className="h-5 w-5" aria-hidden="true" />
+              Comenzar misión de hoy
+            </Link>
+            <Link href="/practicar" className="btn-secondary">
+              <Dumbbell className="h-5 w-5" aria-hidden="true" />
+              Practicar libremente
+            </Link>
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-5 font-display text-sm font-semibold text-tinta/60"
+          >
+            Hecho con <span aria-hidden="true">❤️</span>
+            <span className="sr-only">amor</span> por su maestra{" "}
+            <span className="text-coral-dark">Marisol Licon</span>
+          </motion.p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        {/* Animated illustration area */}
+        <div
+          className="pointer-events-none absolute -right-4 top-1/2 hidden -translate-y-1/2 select-none lg:block"
+          aria-hidden="true"
         >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <motion.div
+            className="relative h-64 w-64"
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <span className="absolute left-8 top-4 text-7xl">📚</span>
+            <motion.span
+              className="absolute right-6 top-0 text-5xl"
+              animate={{ rotate: [0, 15, -15, 0] }}
+              transition={{ duration: 5, repeat: Infinity }}
+            >
+              ✏️
+            </motion.span>
+            <motion.span
+              className="absolute bottom-10 left-0 text-5xl"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            >
+              ⭐
+            </motion.span>
+            <span className="absolute bottom-0 right-10 text-6xl">🧮</span>
+            <motion.span
+              className="absolute left-24 top-24 font-display text-4xl font-bold text-azul/40"
+              animate={{ opacity: [0.3, 0.8, 0.3] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+            >
+              7×8
+            </motion.span>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      {hasHydrated && studentName && (
+        <section aria-label="Tu progreso">
+          <StudentStats />
+        </section>
+      )}
+
+      {/* Weekly calendar */}
+      <WeeklyCalendar />
     </div>
   );
 }
