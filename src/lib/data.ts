@@ -7,23 +7,23 @@ export const DAYS: DayConfig[] = [
     topic: "restas",
     warmupTopic: "sumas",
     emoji: "✏️",
-    title: "Sumas y restas",
+    title: "Ejercicios variados",
   },
   {
     slug: "martes",
     name: "Martes",
     topic: "multiplicaciones",
     warmupTopic: "sumas",
-    emoji: "✖️",
-    title: "Multiplicaciones",
+    emoji: "🎲",
+    title: "Ejercicios variados",
   },
   {
     slug: "miercoles",
     name: "Miércoles",
     topic: "divisiones",
     warmupTopic: "multiplicaciones",
-    emoji: "➗",
-    title: "Divisiones",
+    emoji: "🧩",
+    title: "Ejercicios variados",
   },
   {
     slug: "jueves",
@@ -31,7 +31,7 @@ export const DAYS: DayConfig[] = [
     topic: "fracciones",
     warmupTopic: "divisiones",
     emoji: "🍕",
-    title: "Fracciones",
+    title: "Variados + fracciones",
   },
   {
     slug: "viernes",
@@ -39,7 +39,7 @@ export const DAYS: DayConfig[] = [
     topic: "decimales",
     warmupTopic: "fracciones",
     emoji: "🧮",
-    title: "Decimales y problemas",
+    title: "Variados + decimales",
   },
 ];
 
