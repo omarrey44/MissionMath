@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Trash2 } from "lucide-react";
+import { Trash2, UserRoundPlus } from "lucide-react";
 import { StudentStats } from "@/components/StudentStats";
 import { BadgeCard } from "@/components/BadgeCard";
 import { ProgressBar } from "@/components/ProgressBar";
@@ -17,9 +18,12 @@ export default function ProgressPage() {
     exercisesSolved,
     correctAnswers,
     resetProgress,
+    switchStudent,
     hasHydrated,
   } = useProgress();
+  const router = useRouter();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmSwitch, setConfirmSwitch] = useState(false);
 
   const totalMissions = TOTAL_WEEKS * DAYS.length;
   const missionsDone = Object.keys(completedDays).length;
@@ -68,6 +72,48 @@ export default function ProgressPage() {
             />
           ))}
         </div>
+      </section>
+
+      <section className="card p-6" aria-labelledby="switch-title">
+        <h2 id="switch-title" className="font-display text-lg font-bold text-tinta">
+          👋 Cambiar de alumno
+        </h2>
+        <p className="mt-1 text-sm text-tinta/60">
+          Para computadoras compartidas: cierra la sesión de{" "}
+          {studentName || "este alumno"} en este dispositivo. Su avance queda
+          guardado en el ranking de la maestra; aquí empezará un alumno nuevo.
+        </p>
+        {!confirmSwitch ? (
+          <button
+            onClick={() => setConfirmSwitch(true)}
+            className="btn-ghost mt-4 text-sm"
+          >
+            <UserRoundPlus className="h-4 w-4" aria-hidden="true" />
+            Cambiar de alumno
+          </button>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 flex flex-wrap items-center gap-3"
+          >
+            <span className="font-display text-sm font-bold text-azul">
+              ¿Cerrar la sesión de {studentName || "este alumno"}?
+            </span>
+            <button
+              onClick={() => {
+                switchStudent();
+                router.push("/");
+              }}
+              className="rounded-2xl bg-azul px-5 py-2.5 font-display text-sm font-bold text-white hover:bg-azul-dark"
+            >
+              Sí, cambiar
+            </button>
+            <button onClick={() => setConfirmSwitch(false)} className="btn-ghost text-sm">
+              Cancelar
+            </button>
+          </motion.div>
+        )}
       </section>
 
       <section className="card border-2 border-error/20 p-6" aria-labelledby="reset-title">

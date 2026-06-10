@@ -529,25 +529,22 @@ export function difficultyForWeek(week: number): Difficulty {
 }
 
 /**
- * Builds the required mission exercises for a day:
- * 2 sumas, 2 restas, 2 multiplicaciones, 2 divisiones,
- * 2 of the day's special topic, and 1 word problem at the end.
+ * Builds the required mission exercises, same varied mix every day:
+ * one of each — suma, resta, multiplicación, división, fracción,
+ * decimal — and a word problem at the end.
  */
-export function generateMission(dayTopic: Topic, difficulty: Difficulty): Exercise[] {
-  // The four base operations are always practiced; the special slot adds
-  // the day's theme (fracciones/decimales) or mixed operations otherwise.
-  const baseOps: Topic[] = ["sumas", "restas", "multiplicaciones", "divisiones"];
-  const special: Topic = baseOps.includes(dayTopic) ? "mixtas" : dayTopic;
-
-  const exercises: Exercise[] = [];
-  for (const topic of baseOps) {
-    exercises.push(generateExercise(topic, difficulty));
-    exercises.push(generateExercise(topic, difficulty));
-  }
-  exercises.push(generateExercise(special, difficulty));
-  exercises.push(generateExercise(special, difficulty));
+export function generateMission(difficulty: Difficulty): Exercise[] {
+  const topics: Topic[] = [
+    "sumas",
+    "restas",
+    "multiplicaciones",
+    "divisiones",
+    "fracciones",
+    "decimales",
+  ];
+  const exercises = topics.map((topic) => generateExercise(topic, difficulty));
   exercises.push(generateWordProblem(difficulty));
   return exercises;
 }
 
-export const MISSION_SIZE = 11;
+export const MISSION_SIZE = 7;

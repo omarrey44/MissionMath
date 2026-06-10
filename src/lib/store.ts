@@ -45,6 +45,11 @@ interface ProgressState {
   completeMission: (week: number, daySlug: string, stars: number) => string[];
   saveMission: (key: string, save: MissionSave) => void;
   clearMission: (key: string) => void;
+  /**
+   * Clears the local session so another student can use this device.
+   * The previous student's progress stays in the ranking DB.
+   */
+  switchStudent: () => void;
   resetProgress: () => void;
   setHydrated: () => void;
 }
@@ -148,6 +153,14 @@ export const useProgress = create<ProgressState>()(
           delete rest[key];
           return { missionSaves: rest };
         }),
+
+      switchStudent: () =>
+        set((s) => ({
+          ...initialState,
+          hasHydrated: true,
+          // Teacher session belongs to the device, not the student
+          teacherUser: s.teacherUser,
+        })),
 
       resetProgress: () => set({ ...initialState, hasHydrated: true }),
       setHydrated: () => set({ hasHydrated: true }),

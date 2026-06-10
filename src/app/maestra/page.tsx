@@ -77,7 +77,7 @@ export default function TeacherPage() {
                   </td>
                   <td className="px-3 py-2.5 text-tinta/80">{d.title}</td>
                   <td className="px-3 py-2.5 text-tinta/60">
-                    11 ejercicios (3 niveles de dificultad) + práctica libre
+                    7 ejercicios (3 niveles de dificultad) + práctica libre
                   </td>
                 </tr>
               ))}

@@ -31,7 +31,7 @@ export const DAYS: DayConfig[] = [
     topic: "fracciones",
     warmupTopic: "divisiones",
     emoji: "🍕",
-    title: "Variados + fracciones",
+    title: "Ejercicios variados",
   },
   {
     slug: "viernes",
@@ -39,7 +39,7 @@ export const DAYS: DayConfig[] = [
     topic: "decimales",
     warmupTopic: "fracciones",
     emoji: "🧮",
-    title: "Variados + decimales",
+    title: "Ejercicios variados",
   },
 ];
 

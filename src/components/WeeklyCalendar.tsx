@@ -86,7 +86,7 @@ export function WeeklyCalendar() {
               <h3 className="mt-2 font-display text-lg font-bold text-tinta">{day.name}</h3>
               <p className="text-sm text-tinta/60">{day.title}</p>
               <p className="mt-1 text-xs font-semibold text-tinta/50">
-                11 ejercicios · elige tu dificultad
+                7 ejercicios · elige tu dificultad
               </p>
 
               <div className="mt-2 flex gap-0.5" aria-label={`${starsEarned} de 3 estrellas`}>

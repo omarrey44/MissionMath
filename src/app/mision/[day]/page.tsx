@@ -84,7 +84,7 @@ export default function MissionPage({ params }: { params: { day: string } }) {
   // Random exercises are generated on the client only (after the student
   // picks a difficulty), so there is no SSR hydration mismatch.
   function startMission(diff: Difficulty) {
-    const mission = generateMission(day!.topic, diff);
+    const mission = generateMission(diff);
     setDifficulty(diff);
     setExercises(mission);
     setRequired(mission.length);
@@ -215,13 +215,8 @@ export default function MissionPage({ params }: { params: { day: string } }) {
             Misión del {day.name}
           </h1>
           <p className="mt-2 text-tinta/70">
-            11 ejercicios: sumas, restas, multiplicaciones, divisiones,{" "}
-            {TOPIC_LABELS[
-              ["sumas", "restas", "multiplicaciones", "divisiones"].includes(day.topic)
-                ? "mixtas"
-                : day.topic
-            ].toLowerCase()}{" "}
-            y un problema razonado.
+            7 ejercicios variados: una suma, una resta, una multiplicación, una
+            división, una fracción, un decimal y un problema razonado.
           </p>
           <p className="mt-4 font-display text-lg font-bold text-tinta">
             Elige tu dificultad:
