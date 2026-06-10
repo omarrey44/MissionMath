@@ -12,7 +12,14 @@ export function getDb(): SupabaseClient | null {
     process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return null;
-  return createClient(url, key, { auth: { persistSession: false } });
+  return createClient(url, key, {
+    auth: { persistSession: false },
+    global: {
+      // Next.js caches fetch() responses inside route handlers by default,
+      // which freezes ranking reads. Force every Supabase request to skip it.
+      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+    },
+  });
 }
 
 export interface StudentRow {
