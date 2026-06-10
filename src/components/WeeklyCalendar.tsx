@@ -13,15 +13,14 @@ export function WeeklyCalendar() {
   const { completedDays, missionSaves, currentWeek, setWeek, hasHydrated } =
     useProgress();
 
-  // Days unlock by real calendar date: today and past days are available,
-  // future days stay locked. On weekends everything opens for catch-up.
+  // Only today's mission (real calendar date) is available; past and
+  // future days stay locked. On weekends there is no daily mission.
   const todayIdx = todayWeekdayIndex();
 
   function statusFor(week: number, index: number): DayStatus {
     const key = `w${week}-${DAYS[index].slug}`;
     if (completedDays[key]) return "completed";
-    if (todayIdx === -1 || index <= todayIdx) return "available";
-    return "locked";
+    return index === todayIdx ? "available" : "locked";
   }
 
   return (

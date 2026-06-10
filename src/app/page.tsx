@@ -14,9 +14,9 @@ export default function HomePage() {
   const { studentName, hasHydrated } = useProgress();
 
   // Today's mission follows the real calendar (Chihuahua time);
-  // weekends point to Monday's mission.
+  // on weekends there is no daily mission, only free practice.
   const todayIdx = todayWeekdayIndex();
-  const nextDay = DAYS[todayIdx === -1 ? 0 : todayIdx];
+  const nextDay = todayIdx === -1 ? null : DAYS[todayIdx];
 
   return (
     <div className="flex flex-col gap-10">
@@ -47,10 +47,12 @@ export default function HomePage() {
             transition={{ delay: 0.3 }}
             className="mt-6 flex flex-wrap gap-3"
           >
-            <Link href={`/mision/${nextDay.slug}`} className="btn-primary">
-              <Rocket className="h-5 w-5" aria-hidden="true" />
-              Comenzar misión de hoy
-            </Link>
+            {nextDay && (
+              <Link href={`/mision/${nextDay.slug}`} className="btn-primary">
+                <Rocket className="h-5 w-5" aria-hidden="true" />
+                Comenzar misión de hoy
+              </Link>
+            )}
             <Link href="/practicar" className="btn-secondary">
               <Dumbbell className="h-5 w-5" aria-hidden="true" />
               Practicar libremente

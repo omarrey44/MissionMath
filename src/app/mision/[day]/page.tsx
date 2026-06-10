@@ -10,6 +10,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { CompletionModal } from "@/components/CompletionModal";
 import { generateMission, generateExercise, difficultyForWeek } from "@/lib/generators";
 import { BADGES, DAYS, TOPIC_LABELS, TOPIC_EMOJIS } from "@/lib/data";
+import { todayWeekdayIndex } from "@/lib/date";
 import { useProgress } from "@/lib/store";
 import type { Difficulty, Exercise } from "@/lib/types";
 
@@ -136,6 +137,42 @@ export default function MissionPage({ params }: { params: { day: string } }) {
     setShowCompletion(false);
     setExtraMode(true);
     nextExercise();
+  }
+
+  // Each mission can only be played on its real calendar day
+  const dayIndex = DAYS.findIndex((d) => d.slug === day.slug);
+  const isPlayableToday = dayIndex === todayWeekdayIndex();
+
+  if (!isPlayableToday) {
+    return (
+      <div className="mx-auto flex max-w-2xl flex-col gap-6">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card p-8 text-center"
+        >
+          <span className="text-5xl" aria-hidden="true">
+            🔒
+          </span>
+          <h1 className="mt-3 font-display text-2xl font-bold text-tinta">
+            Esta misión solo se abre el {day.name.toLowerCase()}
+          </h1>
+          <p className="mt-2 text-tinta/70">
+            Cada día tiene su propia misión. Mientras tanto, ¡puedes seguir
+            practicando todo lo que quieras!
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link href="/practicar" className="btn-primary">
+              Practicar libremente
+            </Link>
+            <Link href="/" className="btn-ghost">
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Volver al calendario
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
   }
 
   // Wait for localStorage before deciding between resume and selector
