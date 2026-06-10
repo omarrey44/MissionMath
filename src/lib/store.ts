@@ -7,7 +7,11 @@ import type { Topic } from "./types";
 
 interface ProgressState {
   hasHydrated: boolean;
+  /** Stable anonymous id used to identify this student in the ranking DB. */
+  studentId: string;
   studentName: string;
+  /** Teacher username entered in Modo Maestra; grants access while it matches. */
+  teacherUser: string;
   points: number;
   stars: number;
   badges: string[];
@@ -22,6 +26,7 @@ interface ProgressState {
   currentWeek: number;
 
   setName: (name: string) => void;
+  setTeacherUser: (user: string) => void;
   setWeek: (week: number) => void;
   /** Records an answered exercise. Returns the ids of badges unlocked right now. */
   recordAnswer: (topic: Topic, correct: boolean, points: number) => string[];
@@ -65,7 +70,9 @@ function checkBadges(state: {
 
 const initialState = {
   hasHydrated: false,
+  studentId: "",
   studentName: "",
+  teacherUser: "",
   points: 0,
   stars: 0,
   badges: [] as string[],
@@ -83,7 +90,13 @@ export const useProgress = create<ProgressState>()(
     (set, get) => ({
       ...initialState,
 
-      setName: (name) => set({ studentName: name.trim() }),
+      setName: (name) =>
+        set((s) => ({
+          studentName: name.trim(),
+          // Keep the same id if the student just renames themselves
+          studentId: s.studentId || crypto.randomUUID(),
+        })),
+      setTeacherUser: (user) => set({ teacherUser: user.trim() }),
       setWeek: (week) => set({ currentWeek: week }),
 
       recordAnswer: (topic, correct, points) => {

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { FloatingBackground } from "@/components/FloatingBackground";
+import { ProgressSync } from "@/components/ProgressSync";
 
 const baloo = Baloo_2({
   subsets: ["latin"],
@@ -36,6 +37,7 @@ export default function RootLayout({
         className={`${baloo.variable} ${nunito.variable} bg-notebook font-body antialiased`}
       >
         <FloatingBackground />
+        <ProgressSync />
         <Header />
         <main className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-28 pt-6 md:pb-12">
           {children}

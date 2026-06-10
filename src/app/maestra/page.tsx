@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import { Copy, Printer, Check } from "lucide-react";
+import { TeacherRanking } from "@/components/TeacherRanking";
+import { TeacherGate, TeacherSessionBar, useTeacherAccess } from "@/components/TeacherGate";
 import { DAYS, PARENT_MESSAGE, TOPIC_LABELS, WEEK_DESCRIPTIONS, TOTAL_WEEKS } from "@/lib/data";
 import { generateExercise } from "@/lib/generators";
 import type { Exercise } from "@/lib/types";
 
 export default function TeacherPage() {
+  const { hasHydrated, isTeacher } = useTeacherAccess();
   const [copied, setCopied] = useState(false);
   const [examples, setExamples] = useState<Exercise[]>([]);
 
@@ -22,8 +25,18 @@ export default function TeacherPage() {
     );
   }
 
+  // Wait for localStorage hydration to avoid flashing the login form
+  if (!hasHydrated) {
+    return <div className="card mx-auto h-64 max-w-md animate-pulse" aria-busy="true" />;
+  }
+
+  if (!isTeacher) {
+    return <TeacherGate />;
+  }
+
   return (
     <div className="flex flex-col gap-8">
+      <TeacherSessionBar />
       <header className="no-print">
         <h1 className="font-display text-3xl font-bold text-tinta">🍎 Modo Maestra</h1>
         <p className="mt-1 text-tinta/70">
@@ -31,6 +44,9 @@ export default function TeacherPage() {
           familias.
         </p>
       </header>
+
+      {/* Student ranking */}
+      <TeacherRanking />
 
       {/* Weekly plan */}
       <section className="card p-6" aria-labelledby="plan-title">
