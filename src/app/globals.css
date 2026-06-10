@@ -4,7 +4,8 @@
 
 body {
   color: #1e2a4a;
-  background-color: #fff9ee;
+  /* Soft blue-gray app background, like a modern school dashboard */
+  background-color: #eef4fb;
 }
 
 /* Notebook grid texture over the cream background */

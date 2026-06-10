@@ -3,6 +3,7 @@ import { Baloo_2, Nunito } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
+import { Sidebar } from "@/components/Sidebar";
 import { FloatingBackground } from "@/components/FloatingBackground";
 import { ProgressSync } from "@/components/ProgressSync";
 
@@ -33,15 +34,18 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
-      <body
-        className={`${baloo.variable} ${nunito.variable} bg-notebook font-body antialiased`}
-      >
+      <body className={`${baloo.variable} ${nunito.variable} font-body antialiased`}>
         <FloatingBackground />
         <ProgressSync />
-        <Header />
-        <main className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-28 pt-6 md:pb-12">
-          {children}
-        </main>
+        <div className="flex min-h-screen">
+          <Sidebar />
+          <div className="min-w-0 flex-1">
+            <Header />
+            <main className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-28 pt-6 md:pb-12">
+              {children}
+            </main>
+          </div>
+        </div>
         <BottomNav />
       </body>
     </html>

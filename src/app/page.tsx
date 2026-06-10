@@ -23,7 +23,7 @@ export default function HomePage() {
       <NamePrompt />
 
       {/* Hero */}
-      <section className="card relative overflow-hidden bg-gradient-to-br from-cielo via-white to-amarillo-light/40 p-8 md:p-12">
+      <section className="card relative overflow-hidden bg-gradient-to-br from-white via-cielo/60 to-cielo p-8 md:p-12">
         <div className="relative z-10 max-w-xl">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -70,39 +70,82 @@ export default function HomePage() {
           </motion.p>
         </div>
 
-        {/* Animated illustration area */}
+        {/* Animated chalkboard illustration */}
         <div
-          className="pointer-events-none absolute -right-4 top-1/2 hidden -translate-y-1/2 select-none lg:block"
+          className="pointer-events-none absolute right-6 top-1/2 hidden -translate-y-1/2 select-none md:block"
           aria-hidden="true"
         >
           <motion.div
-            className="relative h-64 w-64"
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="relative h-60 w-72"
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
           >
-            <span className="absolute left-8 top-4 text-7xl">📚</span>
+            {/* Chalkboard card */}
+            <motion.div
+              initial={{ rotate: -4, opacity: 0, scale: 0.9 }}
+              animate={{ rotate: -4, opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 120 }}
+              className="absolute left-10 top-6 h-36 w-48 rounded-2xl border-8 border-[#C68B5B] bg-[#2E5D4B] shadow-card-hover"
+            >
+              <motion.p
+                className="mt-7 text-center font-display text-4xl font-bold text-white/95"
+                animate={{ opacity: [1, 0.65, 1] }}
+                transition={{ duration: 2.8, repeat: Infinity }}
+              >
+                7×8=?
+              </motion.p>
+              <span className="absolute bottom-2 left-3 h-1.5 w-8 rounded-full bg-white/60" />
+              <span className="absolute bottom-2 left-12 h-1.5 w-4 rounded-full bg-amarillo/80" />
+            </motion.div>
+
+            {/* Floating school objects */}
             <motion.span
-              className="absolute right-6 top-0 text-5xl"
-              animate={{ rotate: [0, 15, -15, 0] }}
+              className="absolute -left-2 bottom-10 text-5xl drop-shadow"
+              animate={{ rotate: [0, 6, -6, 0] }}
               transition={{ duration: 5, repeat: Infinity }}
+            >
+              📚
+            </motion.span>
+            <motion.span
+              className="absolute right-2 top-0 text-4xl drop-shadow"
+              animate={{ rotate: [12, 28, 12], y: [0, -6, 0] }}
+              transition={{ duration: 4, repeat: Infinity }}
             >
               ✏️
             </motion.span>
             <motion.span
-              className="absolute bottom-10 left-0 text-5xl"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 3, repeat: Infinity }}
+              className="absolute right-0 bottom-14 text-4xl drop-shadow"
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 3.2, repeat: Infinity, delay: 0.6 }}
+            >
+              🧮
+            </motion.span>
+            <motion.span
+              className="absolute left-4 top-0 text-3xl"
+              animate={{ scale: [1, 1.3, 1], rotate: [0, 18, 0] }}
+              transition={{ duration: 2.6, repeat: Infinity }}
             >
               ⭐
             </motion.span>
-            <span className="absolute bottom-0 right-10 text-6xl">🧮</span>
             <motion.span
-              className="absolute left-24 top-24 font-display text-4xl font-bold text-azul/40"
-              animate={{ opacity: [0.3, 0.8, 0.3] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
+              className="absolute right-16 bottom-2 text-2xl"
+              animate={{ scale: [1, 1.25, 1] }}
+              transition={{ duration: 2.2, repeat: Infinity, delay: 1 }}
             >
-              7×8
+              ✨
             </motion.span>
+
+            {/* Grass strip */}
+            <div className="absolute bottom-0 left-6 right-4 flex justify-between">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <motion.span
+                  key={i}
+                  className="block h-6 w-3 origin-bottom rounded-t-full bg-exito/80"
+                  animate={{ rotate: [0, i % 2 ? 8 : -8, 0] }}
+                  transition={{ duration: 2.4, repeat: Infinity, delay: i * 0.15 }}
+                />
+              ))}
+            </div>
           </motion.div>
         </div>
       </section>

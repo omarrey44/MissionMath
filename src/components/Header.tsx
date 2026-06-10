@@ -17,9 +17,9 @@ export function Header() {
   const { points, stars, streak, studentName, hasHydrated } = useProgress();
 
   return (
-    <header className="no-print sticky top-0 z-30 border-b-2 border-azul/10 bg-white/90 backdrop-blur">
+    <header className="no-print sticky top-0 z-30 border-b-2 border-azul/10 bg-white/90 backdrop-blur lg:border-none lg:bg-transparent lg:backdrop-blur-0">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-        <Link href="/" className="flex items-center gap-2" aria-label="Ir al inicio">
+        <Link href="/" className="flex items-center gap-2 lg:hidden" aria-label="Ir al inicio">
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-azul text-white shadow-boton">
             <Calculator className="h-6 w-6" aria-hidden="true" />
           </span>

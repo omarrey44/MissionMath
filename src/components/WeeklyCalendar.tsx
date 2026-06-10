@@ -24,7 +24,7 @@ export function WeeklyCalendar() {
   }
 
   return (
-    <section aria-labelledby="calendar-title">
+    <section aria-labelledby="calendar-title" className="card p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="calendar-title" className="font-display text-2xl font-bold text-tinta">
           📅 Misiones de la semana
@@ -64,10 +64,14 @@ export function WeeklyCalendar() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
-              className={`card relative flex flex-col p-5 ${
-                status === "locked" ? "opacity-60" : "hover:shadow-card-hover"
-              } ${status === "completed" ? "ring-4 ring-exito/30" : ""} ${
-                isToday && status !== "completed" ? "ring-4 ring-azul/40" : ""
+              className={`relative flex flex-col rounded-3xl border-2 bg-white p-5 shadow-card transition-shadow ${
+                status === "locked" ? "opacity-55" : "hover:shadow-card-hover"
+              } ${
+                status === "completed"
+                  ? "border-exito/40 bg-exito/5"
+                  : isToday
+                    ? "border-azul"
+                    : "border-tinta/5"
               }`}
             >
               {isToday && (
@@ -76,7 +80,13 @@ export function WeeklyCalendar() {
                 </span>
               )}
               <motion.span
-                className="text-4xl"
+                className={`grid h-14 w-14 place-items-center rounded-2xl text-3xl ${
+                  status === "completed"
+                    ? "bg-exito/15"
+                    : isToday
+                      ? "bg-azul/10"
+                      : "bg-cielo"
+                }`}
                 aria-hidden="true"
                 animate={status === "available" ? { rotate: [0, -8, 8, 0] } : {}}
                 transition={{ repeat: Infinity, duration: 2.5, repeatDelay: 1 }}
