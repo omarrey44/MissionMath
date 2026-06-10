@@ -17,3 +17,10 @@ create table public.students (
 -- RLS activado sin políticas públicas: solo el service role (la API del
 -- servidor) puede leer/escribir. El navegador nunca toca la base directamente.
 alter table public.students enable row level security;
+
+-- Respaldo completo del progreso para restaurar alumnos que regresan
+alter table public.students add column if not exists extra jsonb;
+
+-- Un nombre no se puede repetir (sin distinguir mayúsculas/minúsculas)
+create unique index if not exists students_name_unique
+  on public.students (lower(name));

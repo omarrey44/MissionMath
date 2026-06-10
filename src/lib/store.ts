@@ -50,6 +50,22 @@ interface ProgressState {
    * The previous student's progress stays in the ranking DB.
    */
   switchStudent: () => void;
+  /** Restores a returning student from their DB row (same name = same account). */
+  restoreStudent: (row: {
+    id: string;
+    name: string;
+    points: number;
+    stars: number;
+    exercises: number;
+    correct: number;
+    streak: number;
+    extra?: {
+      completedDays?: Record<string, boolean>;
+      badges?: string[];
+      topicCorrect?: Record<string, number>;
+      currentWeek?: number;
+    } | null;
+  }) => void;
   resetProgress: () => void;
   setHydrated: () => void;
 }
@@ -153,6 +169,26 @@ export const useProgress = create<ProgressState>()(
           delete rest[key];
           return { missionSaves: rest };
         }),
+
+      restoreStudent: (row) =>
+        set((s) => ({
+          ...initialState,
+          hasHydrated: true,
+          teacherUser: s.teacherUser,
+          studentId: row.id,
+          studentName: row.name,
+          points: row.points,
+          stars: row.stars,
+          exercisesSolved: row.exercises,
+          correctAnswers: row.correct,
+          streak: row.streak,
+          completedDays: row.extra?.completedDays ?? {},
+          badges: row.extra?.badges ?? [],
+          topicCorrect: (row.extra?.topicCorrect ?? {}) as Partial<
+            Record<Topic, number>
+          >,
+          currentWeek: row.extra?.currentWeek ?? 1,
+        })),
 
       switchStudent: () =>
         set((s) => ({

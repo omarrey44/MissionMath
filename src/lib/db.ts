@@ -32,4 +32,13 @@ export interface StudentRow {
   correct: number;
   streak: number;
   last_active: string;
+  /** Full local progress snapshot (completedDays, badges, etc.) for restore. */
+  extra?: StudentExtra | null;
+}
+
+export interface StudentExtra {
+  completedDays: Record<string, boolean>;
+  badges: string[];
+  topicCorrect: Record<string, number>;
+  currentWeek: number;
 }

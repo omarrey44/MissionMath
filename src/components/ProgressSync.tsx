@@ -15,6 +15,13 @@ function buildPayload(s: ReturnType<typeof useProgress.getState>) {
     exercises: s.exercisesSolved,
     correct: s.correctAnswers,
     streak: s.streak,
+    // Full snapshot so a returning student can restore everything
+    extra: {
+      completedDays: s.completedDays,
+      badges: s.badges,
+      topicCorrect: s.topicCorrect,
+      currentWeek: s.currentWeek,
+    },
   };
 }
 

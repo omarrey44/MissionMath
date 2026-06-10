@@ -33,6 +33,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
   }
 
+  // Full progress snapshot for restoring a returning student (size-capped)
+  let extra: unknown = null;
+  if (body.extra && typeof body.extra === "object") {
+    const raw = JSON.stringify(body.extra);
+    if (raw.length <= 20_000) extra = body.extra;
+  }
+
   const row = {
     id,
     name,
@@ -45,8 +52,19 @@ export async function POST(request: Request) {
     last_active: new Date().toISOString(),
   };
 
-  const { error } = await db.from("students").upsert(row);
+  let { error } = await db.from("students").upsert({ ...row, extra });
+  if (error && /extra/.test(error.message)) {
+    // The extra column migration hasn't been run yet; sync the basics anyway
+    ({ error } = await db.from("students").upsert(row));
+  }
   if (error) {
+    // Unique name index: someone else already owns this name
+    if (/students_name_unique|duplicate key/.test(error.message)) {
+      return NextResponse.json(
+        { error: "Ese nombre ya está ocupado por otro alumno" },
+        { status: 409 }
+      );
+    }
     console.error("sync upsert failed:", error.message);
     return NextResponse.json({ error: "Error al guardar" }, { status: 500 });
   }
