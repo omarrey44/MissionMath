@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Calculator, Home, Dumbbell, TrendingUp, Apple, Flame, Star } from "lucide-react";
 import { useProgress } from "@/lib/store";
+import { SwitchStudentButton } from "./SwitchStudentButton";
 
 const NAV = [
   { href: "/", label: "Inicio", icon: Home },
@@ -106,6 +107,7 @@ export function Sidebar() {
             ¡Hola, {studentName}! 👋
           </p>
         )}
+        <SwitchStudentButton variant="full" />
       </div>
     </aside>
   );

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Calculator, Star, Zap } from "lucide-react";
 import { useProgress } from "@/lib/store";
+import { SwitchStudentButton } from "./SwitchStudentButton";
 
 const NAV = [
   { href: "/", label: "Inicio" },
@@ -63,6 +64,10 @@ export function Header() {
               🔥 {streak}
             </span>
           )}
+          {/* Desktop has this button in the sidebar */}
+          <span className="lg:hidden">
+            <SwitchStudentButton variant="icon" />
+          </span>
         </div>
       </div>
     </header>
