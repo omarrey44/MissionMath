@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -32,7 +32,15 @@ export default function MissionPage({ params }: { params: { day: string } }) {
   const day = DAYS.find((d) => d.slug === params.day);
   if (!day) notFound();
 
-  const { currentWeek, recordAnswer, completeMission } = useProgress();
+  const {
+    currentWeek,
+    recordAnswer,
+    completeMission,
+    missionSaves,
+    saveMission,
+    clearMission,
+    hasHydrated,
+  } = useProgress();
 
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -42,6 +50,24 @@ export default function MissionPage({ params }: { params: { day: string } }) {
   const [showCompletion, setShowCompletion] = useState(false);
   const [newBadgeIds, setNewBadgeIds] = useState<string[]>([]);
   const [extraMode, setExtraMode] = useState(false);
+
+  const saveKey = `w${currentWeek}-${day.slug}`;
+  const restored = useRef(false);
+
+  // Resume an unfinished mission (e.g. the student went back to the menu)
+  useEffect(() => {
+    if (!hasHydrated || restored.current) return;
+    restored.current = true;
+    const save = missionSaves[saveKey];
+    if (save && save.exercises.length > 0) {
+      setDifficulty(save.difficulty);
+      setExercises(save.exercises);
+      setRequired(save.exercises.length);
+      setStep(Math.min(save.step, save.exercises.length - 1));
+      setPointsEarned(save.pointsEarned);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasHydrated]);
 
   const current = exercises[step] as Exercise | undefined;
 
@@ -62,17 +88,34 @@ export default function MissionPage({ params }: { params: { day: string } }) {
     setExercises(mission);
     setRequired(mission.length);
     setStep(0);
+    saveMission(saveKey, {
+      difficulty: diff,
+      exercises: mission,
+      step: 0,
+      pointsEarned: 0,
+    });
   }
 
   function handleResult(correct: boolean) {
     if (!current || !difficulty) return;
     const badges = recordAnswer(current.topic, correct, POINTS[difficulty]);
-    if (correct) setPointsEarned((p) => p + POINTS[difficulty]);
+    const newPoints = pointsEarned + (correct ? POINTS[difficulty] : 0);
+    if (correct) setPointsEarned(newPoints);
     if (badges.length) setNewBadgeIds((prev) => [...prev, ...badges]);
+    // Persist with step advanced so an answered exercise never repeats
+    if (!extraMode) {
+      saveMission(saveKey, {
+        difficulty,
+        exercises,
+        step: Math.min(step + 1, required - 1),
+        pointsEarned: newPoints,
+      });
+    }
   }
 
   function handleContinue() {
     if (!extraMode && step === required - 1) {
+      clearMission(saveKey);
       const badges = completeMission(currentWeek, day!.slug, STARS_PER_MISSION);
       if (badges.length) setNewBadgeIds((prev) => [...prev, ...badges]);
       setShowCompletion(true);
@@ -93,6 +136,17 @@ export default function MissionPage({ params }: { params: { day: string } }) {
     setShowCompletion(false);
     setExtraMode(true);
     nextExercise();
+  }
+
+  // Wait for localStorage before deciding between resume and selector
+  if (!hasHydrated) {
+    return (
+      <div
+        className="card mx-auto h-64 max-w-2xl animate-pulse"
+        aria-busy="true"
+        aria-label="Cargando misión"
+      />
+    );
   }
 
   // ---------- difficulty selection screen ----------

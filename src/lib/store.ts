@@ -3,7 +3,16 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { BADGES } from "./data";
-import type { Topic } from "./types";
+import { todayKey, yesterdayKey } from "./date";
+import type { Difficulty, Exercise, Topic } from "./types";
+
+/** Snapshot of an unfinished daily mission so students can resume it. */
+export interface MissionSave {
+  difficulty: Difficulty;
+  exercises: Exercise[];
+  step: number;
+  pointsEarned: number;
+}
 
 interface ProgressState {
   hasHydrated: boolean;
@@ -24,6 +33,8 @@ interface ProgressState {
   /** Correct answers per topic, used to unlock badges. */
   topicCorrect: Partial<Record<Topic, number>>;
   currentWeek: number;
+  /** In-progress missions keyed "w{week}-{daySlug}", cleared on completion. */
+  missionSaves: Record<string, MissionSave>;
 
   setName: (name: string) => void;
   setTeacherUser: (user: string) => void;
@@ -32,19 +43,12 @@ interface ProgressState {
   recordAnswer: (topic: Topic, correct: boolean, points: number) => string[];
   /** Marks a mission complete and awards stars. Returns newly unlocked badge ids. */
   completeMission: (week: number, daySlug: string, stars: number) => string[];
+  saveMission: (key: string, save: MissionSave) => void;
+  clearMission: (key: string) => void;
   resetProgress: () => void;
   setHydrated: () => void;
 }
 
-function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function isYesterday(dateKey: string): boolean {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  return dateKey === yesterday.toISOString().slice(0, 10);
-}
 
 function checkBadges(state: {
   badges: string[];
@@ -83,6 +87,7 @@ const initialState = {
   correctAnswers: 0,
   topicCorrect: {} as Partial<Record<Topic, number>>,
   currentWeek: 1,
+  missionSaves: {} as Record<string, MissionSave>,
 };
 
 export const useProgress = create<ProgressState>()(
@@ -104,7 +109,7 @@ export const useProgress = create<ProgressState>()(
         const today = todayKey();
         let streak = s.streak;
         if (s.lastActiveDate !== today) {
-          streak = isYesterday(s.lastActiveDate) ? streak + 1 : 1;
+          streak = s.lastActiveDate === yesterdayKey() ? streak + 1 : 1;
         }
         const topicCorrect = { ...s.topicCorrect };
         if (correct) {
@@ -133,6 +138,16 @@ export const useProgress = create<ProgressState>()(
         set({ ...next, badges: [...s.badges, ...newBadges] });
         return newBadges;
       },
+
+      saveMission: (key, save) =>
+        set((s) => ({ missionSaves: { ...s.missionSaves, [key]: save } })),
+
+      clearMission: (key) =>
+        set((s) => {
+          const rest = { ...s.missionSaves };
+          delete rest[key];
+          return { missionSaves: rest };
+        }),
 
       resetProgress: () => set({ ...initialState, hasHydrated: true }),
       setHydrated: () => set({ hasHydrated: true }),

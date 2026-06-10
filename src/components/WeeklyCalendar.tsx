@@ -4,21 +4,24 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Lock, CheckCircle2, Play, Star } from "lucide-react";
 import { DAYS, TOTAL_WEEKS, WEEK_DESCRIPTIONS } from "@/lib/data";
+import { todayWeekdayIndex } from "@/lib/date";
 import { useProgress } from "@/lib/store";
 
 type DayStatus = "locked" | "available" | "completed";
 
 export function WeeklyCalendar() {
-  const { completedDays, currentWeek, setWeek, hasHydrated } = useProgress();
+  const { completedDays, missionSaves, currentWeek, setWeek, hasHydrated } =
+    useProgress();
+
+  // Days unlock by real calendar date: today and past days are available,
+  // future days stay locked. On weekends everything opens for catch-up.
+  const todayIdx = todayWeekdayIndex();
 
   function statusFor(week: number, index: number): DayStatus {
     const key = `w${week}-${DAYS[index].slug}`;
     if (completedDays[key]) return "completed";
-    // A day unlocks when every previous day of the week is completed
-    const previousDone = DAYS.slice(0, index).every(
-      (d) => completedDays[`w${week}-${d.slug}`]
-    );
-    return previousDone ? "available" : "locked";
+    if (todayIdx === -1 || index <= todayIdx) return "available";
+    return "locked";
   }
 
   return (
@@ -51,6 +54,11 @@ export function WeeklyCalendar() {
         {DAYS.map((day, i) => {
           const status: DayStatus = hasHydrated ? statusFor(currentWeek, i) : "locked";
           const starsEarned = status === "completed" ? 3 : 0;
+          const isToday = i === todayIdx;
+          const inProgress =
+            hasHydrated &&
+            status === "available" &&
+            Boolean(missionSaves[`w${currentWeek}-${day.slug}`]);
           return (
             <motion.div
               key={day.slug}
@@ -59,8 +67,15 @@ export function WeeklyCalendar() {
               transition={{ delay: i * 0.08 }}
               className={`card relative flex flex-col p-5 ${
                 status === "locked" ? "opacity-60" : "hover:shadow-card-hover"
-              } ${status === "completed" ? "ring-4 ring-exito/30" : ""}`}
+              } ${status === "completed" ? "ring-4 ring-exito/30" : ""} ${
+                isToday && status !== "completed" ? "ring-4 ring-azul/40" : ""
+              }`}
             >
+              {isToday && (
+                <span className="absolute -top-2.5 right-4 rounded-full bg-azul px-3 py-0.5 font-display text-xs font-bold text-white shadow-boton">
+                  Hoy
+                </span>
+              )}
               <motion.span
                 className="text-4xl"
                 aria-hidden="true"
@@ -99,10 +114,14 @@ export function WeeklyCalendar() {
               {status === "available" && (
                 <Link
                   href={`/mision/${day.slug}`}
-                  className="flex items-center justify-center gap-2 rounded-2xl bg-azul px-4 py-2.5 font-display text-sm font-bold text-white shadow-boton transition-colors hover:bg-azul-dark"
+                  className={`flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5 font-display text-sm font-bold text-white shadow-boton transition-colors ${
+                    inProgress
+                      ? "bg-coral hover:bg-coral-dark"
+                      : "bg-azul hover:bg-azul-dark"
+                  }`}
                 >
                   <Play className="h-4 w-4 fill-white" aria-hidden="true" />
-                  ¡Empezar!
+                  {inProgress ? "Continuar" : "¡Empezar!"}
                 </Link>
               )}
               {status === "completed" && (

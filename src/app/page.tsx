@@ -8,13 +8,15 @@ import { StudentStats } from "@/components/StudentStats";
 import { NamePrompt } from "@/components/NamePrompt";
 import { useProgress } from "@/lib/store";
 import { DAYS } from "@/lib/data";
+import { todayWeekdayIndex } from "@/lib/date";
 
 export default function HomePage() {
-  const { studentName, completedDays, currentWeek, hasHydrated } = useProgress();
+  const { studentName, hasHydrated } = useProgress();
 
-  // First incomplete day of the current week = today's mission
-  const nextDay =
-    DAYS.find((d) => !completedDays[`w${currentWeek}-${d.slug}`]) ?? DAYS[0];
+  // Today's mission follows the real calendar (Chihuahua time);
+  // weekends point to Monday's mission.
+  const todayIdx = todayWeekdayIndex();
+  const nextDay = DAYS[todayIdx === -1 ? 0 : todayIdx];
 
   return (
     <div className="flex flex-col gap-10">
