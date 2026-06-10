@@ -37,7 +37,8 @@ export async function POST(request: Request) {
   let extra: unknown = null;
   if (body.extra && typeof body.extra === "object") {
     const raw = JSON.stringify(body.extra);
-    if (raw.length <= 20_000) extra = body.extra;
+    // Mission saves include full exercise text, so allow a generous cap
+    if (raw.length <= 80_000) extra = body.extra;
   }
 
   const row = {

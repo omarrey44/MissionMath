@@ -46,7 +46,7 @@ export function Header() {
 
         <div className="flex items-center gap-2" aria-label="Tus puntos y estrellas">
           {hasHydrated && studentName && (
-            <span className="hidden font-display text-sm text-tinta/70 lg:block">
+            <span className="max-w-[110px] truncate font-display text-sm font-bold text-tinta/70 sm:max-w-[160px]">
               ¡Hola, {studentName}!
             </span>
           )}

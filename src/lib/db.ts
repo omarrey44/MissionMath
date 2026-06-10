@@ -41,4 +41,6 @@ export interface StudentExtra {
   badges: string[];
   topicCorrect: Record<string, number>;
   currentWeek: number;
+  /** In-progress missions so clearing the browser doesn't lose them. */
+  missionSaves?: Record<string, unknown>;
 }

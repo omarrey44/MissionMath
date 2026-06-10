@@ -64,6 +64,7 @@ interface ProgressState {
       badges?: string[];
       topicCorrect?: Record<string, number>;
       currentWeek?: number;
+      missionSaves?: Record<string, MissionSave>;
     } | null;
   }) => void;
   resetProgress: () => void;
@@ -189,6 +190,7 @@ export const useProgress = create<ProgressState>()(
             Record<Topic, number>
           >,
           currentWeek: row.extra?.currentWeek ?? 1,
+          missionSaves: row.extra?.missionSaves ?? {},
         })),
 
       switchStudent: () =>

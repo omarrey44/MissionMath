@@ -21,6 +21,7 @@ function buildPayload(s: ReturnType<typeof useProgress.getState>) {
       badges: s.badges,
       topicCorrect: s.topicCorrect,
       currentWeek: s.currentWeek,
+      missionSaves: s.missionSaves,
     },
   };
 }
@@ -64,6 +65,7 @@ export function ProgressSync() {
         state.stars === prev.stars &&
         state.exercisesSolved === prev.exercisesSolved &&
         state.completedDays === prev.completedDays &&
+        state.missionSaves === prev.missionSaves &&
         state.studentName === prev.studentName
       ) {
         return;
