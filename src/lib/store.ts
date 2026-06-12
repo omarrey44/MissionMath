@@ -35,6 +35,10 @@ interface ProgressState {
   currentWeek: number;
   /** In-progress missions keyed "w{week}-{daySlug}", cleared on completion. */
   missionSaves: Record<string, MissionSave>;
+  /** Seconds to complete each mission, keyed "w{week}-{daySlug}". */
+  missionTimes: Record<string, number>;
+  /** Last vacation week for which the welcome modal was shown. */
+  lastWelcomedWeek: number;
 
   setName: (name: string) => void;
   setTeacherUser: (user: string) => void;
@@ -45,6 +49,8 @@ interface ProgressState {
   completeMission: (week: number, daySlug: string, stars: number) => string[];
   saveMission: (key: string, save: MissionSave) => void;
   clearMission: (key: string) => void;
+  saveMissionTime: (key: string, seconds: number) => void;
+  setWelcomedWeek: (week: number) => void;
   /**
    * Clears the local session so another student can use this device.
    * The previous student's progress stays in the ranking DB.
@@ -65,6 +71,7 @@ interface ProgressState {
       topicCorrect?: Record<string, number>;
       currentWeek?: number;
       missionSaves?: Record<string, MissionSave>;
+      missionTimes?: Record<string, number>;
     } | null;
   }) => void;
   resetProgress: () => void;
@@ -110,6 +117,8 @@ const initialState = {
   topicCorrect: {} as Partial<Record<Topic, number>>,
   currentWeek: 1,
   missionSaves: {} as Record<string, MissionSave>,
+  missionTimes: {} as Record<string, number>,
+  lastWelcomedWeek: 0,
 };
 
 export const useProgress = create<ProgressState>()(
@@ -125,6 +134,7 @@ export const useProgress = create<ProgressState>()(
         })),
       setTeacherUser: (user) => set({ teacherUser: user.trim() }),
       setWeek: (week) => set({ currentWeek: week }),
+      setWelcomedWeek: (week) => set({ lastWelcomedWeek: week }),
 
       recordAnswer: (topic, correct, points) => {
         const s = get();
@@ -172,6 +182,9 @@ export const useProgress = create<ProgressState>()(
           return { missionSaves: rest };
         }),
 
+      saveMissionTime: (key, seconds) =>
+        set((s) => ({ missionTimes: { ...s.missionTimes, [key]: seconds } })),
+
       restoreStudent: (row) =>
         set((s) => ({
           ...initialState,
@@ -191,6 +204,7 @@ export const useProgress = create<ProgressState>()(
           >,
           currentWeek: row.extra?.currentWeek ?? 1,
           missionSaves: row.extra?.missionSaves ?? {},
+          missionTimes: row.extra?.missionTimes ?? {},
         })),
 
       switchStudent: () =>

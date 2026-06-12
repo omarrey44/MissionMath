@@ -39,6 +39,7 @@ export default function MissionPage({ params }: { params: { day: string } }) {
     missionSaves,
     saveMission,
     clearMission,
+    saveMissionTime,
     hasHydrated,
   } = useProgress();
 
@@ -56,6 +57,7 @@ export default function MissionPage({ params }: { params: { day: string } }) {
 
   const saveKey = `w${currentWeek}-${day.slug}`;
   const restored = useRef(false);
+  const missionStartTime = useRef<number | null>(null);
 
   // Resume an unfinished mission (e.g. the student went back to the menu)
   useEffect(() => {
@@ -87,6 +89,7 @@ export default function MissionPage({ params }: { params: { day: string } }) {
   // picks a difficulty), so there is no SSR hydration mismatch.
   function startMission(diff: Difficulty) {
     const mission = generateMission(diff);
+    missionStartTime.current = Date.now();
     setDifficulty(diff);
     setExercises(mission);
     setRequired(mission.length);
@@ -119,6 +122,10 @@ export default function MissionPage({ params }: { params: { day: string } }) {
   function handleContinue() {
     if (!extraMode && step === required - 1) {
       clearMission(saveKey);
+      if (missionStartTime.current) {
+        const elapsed = Math.round((Date.now() - missionStartTime.current) / 1000);
+        saveMissionTime(saveKey, elapsed);
+      }
       const badges = completeMission(currentWeek, day!.slug, STARS_PER_MISSION);
       if (badges.length) setNewBadgeIds((prev) => [...prev, ...badges]);
       setShowCompletion(true);

@@ -43,4 +43,6 @@ export interface StudentExtra {
   currentWeek: number;
   /** In-progress missions so clearing the browser doesn't lose them. */
   missionSaves?: Record<string, unknown>;
+  /** Seconds taken to complete each mission, keyed "w{week}-{slug}". */
+  missionTimes?: Record<string, number>;
 }

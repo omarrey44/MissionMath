@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Sparkles } from "lucide-react";
 import { fireConfetti } from "./confetti";
+import { playSound } from "@/lib/sounds";
 
 interface CompletionModalProps {
   open: boolean;
@@ -22,7 +23,10 @@ export function CompletionModal({
   onKeepPracticing,
 }: CompletionModalProps) {
   useEffect(() => {
-    if (open) fireConfetti();
+    if (open) {
+      fireConfetti();
+      playSound("complete");
+    }
   }, [open]);
 
   return (

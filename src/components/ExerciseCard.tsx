@@ -6,6 +6,7 @@ import { Lightbulb, Check, ArrowRight, RotateCcw } from "lucide-react";
 import type { Exercise } from "@/lib/types";
 import { checkAnswer } from "@/lib/generators";
 import { CORRECT_MESSAGES, INCORRECT_MESSAGES, WRONG_PENALTY } from "@/lib/data";
+import { playSound } from "@/lib/sounds";
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -63,13 +64,15 @@ export function ExerciseCard({
     if (allCorrect) {
       setStatus("correct");
       setFeedback(pickMsg(CORRECT_MESSAGES));
+      playSound("correct");
     } else if (nextAttempts >= 2) {
-      // After 2 failed attempts, reveal the explanation
       setStatus("revealed");
       setFeedback("No pasa nada. Mira la explicación y aprende para la próxima.");
+      playSound("wrong");
     } else {
       setStatus("incorrect");
       setFeedback(pickMsg(INCORRECT_MESSAGES));
+      playSound("wrong");
     }
   }
 

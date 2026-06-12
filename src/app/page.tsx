@@ -6,6 +6,7 @@ import { Rocket, Dumbbell } from "lucide-react";
 import { WeeklyCalendar } from "@/components/WeeklyCalendar";
 import { StudentStats } from "@/components/StudentStats";
 import { NamePrompt } from "@/components/NamePrompt";
+import { WeekWelcomeModal } from "@/components/WeekWelcomeModal";
 import { useProgress } from "@/lib/store";
 import { DAYS } from "@/lib/data";
 import { todayWeekdayIndex } from "@/lib/date";
@@ -21,6 +22,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-10">
       <NamePrompt />
+      <WeekWelcomeModal />
 
       {/* Hero */}
       <section className="card relative overflow-hidden bg-gradient-to-br from-white via-cielo/60 to-cielo p-8 md:p-12">

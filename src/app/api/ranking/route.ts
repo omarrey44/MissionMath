@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await db
     .from("students")
-    .select("id,name,points,stars,missions,exercises,correct,streak,last_active")
+    .select("id,name,points,stars,missions,exercises,correct,streak,last_active,extra")
     .order("points", { ascending: false })
     .limit(200);
 

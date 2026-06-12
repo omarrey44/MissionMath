@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { RefreshCw, Trophy, Users, CalendarCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { RefreshCw, Trophy, Users, CalendarCheck, ChevronDown, ChevronUp, Clock } from "lucide-react";
 import type { StudentRow } from "@/lib/db";
 import { useProgress } from "@/lib/store";
+import { DAYS, TOTAL_WEEKS } from "@/lib/data";
 
 type Status = "loading" | "ready" | "unconfigured" | "error";
 
@@ -24,9 +25,111 @@ function isToday(iso: string): boolean {
   return new Date(iso).toDateString() === new Date().toDateString();
 }
 
+function formatTime(secs: number): string {
+  if (secs < 60) return `${secs}s`;
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+}
+
+function StudentDetail({ student }: { student: StudentRow }) {
+  const completedDays = student.extra?.completedDays ?? {};
+  const missionTimes = student.extra?.missionTimes ?? {};
+  const badges = student.extra?.badges ?? [];
+
+  return (
+    <motion.tr
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      key={`${student.id}-detail`}
+    >
+      <td colSpan={8} className="bg-cielo/40 px-4 pb-4 pt-2">
+        <div className="flex flex-wrap gap-6">
+          {/* Missions per week */}
+          <div className="min-w-[200px] flex-1">
+            <p className="mb-2 font-display text-sm font-bold text-tinta/70">
+              📅 Misiones completadas
+            </p>
+            <div className="flex flex-col gap-1">
+              {Array.from({ length: TOTAL_WEEKS }, (_, wi) => wi + 1).map((week) => (
+                <div key={week} className="flex items-center gap-2">
+                  <span className="w-16 shrink-0 text-xs font-semibold text-tinta/50">
+                    Semana {week}
+                  </span>
+                  <div className="flex gap-1">
+                    {DAYS.map((day) => {
+                      const key = `w${week}-${day.slug}`;
+                      const done = completedDays[key];
+                      const time = missionTimes[key];
+                      return (
+                        <span
+                          key={key}
+                          title={`${day.name}${time ? ` — ${formatTime(time)}` : ""}`}
+                          className={`flex h-6 w-6 items-center justify-center rounded-lg text-xs ${
+                            done
+                              ? "bg-exito/20 text-exito"
+                              : "bg-tinta/5 text-tinta/30"
+                          }`}
+                        >
+                          {done ? "✓" : day.name[0]}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Mission times */}
+          {Object.keys(missionTimes).length > 0 && (
+            <div className="min-w-[180px] flex-1">
+              <p className="mb-2 font-display text-sm font-bold text-tinta/70">
+                <Clock className="mr-1 inline h-4 w-4" />
+                Tiempos de misión
+              </p>
+              <div className="flex flex-col gap-1">
+                {Object.entries(missionTimes)
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([key, secs]) => (
+                    <div key={key} className="flex items-center justify-between gap-3 text-sm">
+                      <span className="text-tinta/60">{key}</span>
+                      <span className="font-display font-bold text-azul">{formatTime(secs)}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Badges */}
+          {badges.length > 0 && (
+            <div className="min-w-[160px]">
+              <p className="mb-2 font-display text-sm font-bold text-tinta/70">
+                🏅 Insignias ({badges.length})
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {badges.map((b) => (
+                  <span
+                    key={b}
+                    className="rounded-full bg-amarillo-light/60 px-2.5 py-1 font-display text-xs font-bold text-amarillo-dark"
+                  >
+                    {b}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </td>
+    </motion.tr>
+  );
+}
+
 export function TeacherRanking() {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [status, setStatus] = useState<Status>("loading");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setStatus("loading");
@@ -117,50 +220,70 @@ export function TeacherRanking() {
               Aún no hay alumnos registrados. En cuanto entren a la app aparecerán aquí.
             </p>
           ) : (
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[560px] border-collapse text-left">
-                <thead>
-                  <tr className="border-b-2 border-azul/20 font-display text-sm text-azul">
-                    <th className="px-3 py-2">#</th>
-                    <th className="px-3 py-2">Alumno</th>
-                    <th className="px-3 py-2 text-right">Puntos</th>
-                    <th className="px-3 py-2 text-right">Misiones</th>
-                    <th className="px-3 py-2 text-right">Ejercicios</th>
-                    <th className="px-3 py-2 text-right">Precisión</th>
-                    <th className="px-3 py-2 text-right">Último ingreso</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((s, i) => (
-                    <motion.tr
-                      key={s.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(i * 0.04, 0.6) }}
-                      className={`border-b border-tinta/10 ${
-                        isToday(s.last_active) ? "bg-exito/5" : ""
-                      }`}
-                    >
-                      <td className="px-3 py-2.5 font-display font-bold text-tinta">
-                        {MEDALS[i] ?? i + 1}
-                      </td>
-                      <td className="px-3 py-2.5 font-semibold text-tinta">{s.name}</td>
-                      <td className="px-3 py-2.5 text-right font-display font-bold text-azul">
-                        {s.points}
-                      </td>
-                      <td className="px-3 py-2.5 text-right text-tinta/80">{s.missions}</td>
-                      <td className="px-3 py-2.5 text-right text-tinta/80">{s.exercises}</td>
-                      <td className="px-3 py-2.5 text-right text-tinta/80">
-                        {s.exercises > 0 ? Math.round((s.correct / s.exercises) * 100) : 0}%
-                      </td>
-                      <td className="px-3 py-2.5 text-right text-sm text-tinta/60">
-                        {formatLastActive(s.last_active)}
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <>
+              <p className="mt-3 text-xs text-tinta/50">
+                Toca un nombre para ver el historial detallado.
+              </p>
+              <div className="mt-2 overflow-x-auto">
+                <table className="w-full min-w-[560px] border-collapse text-left">
+                  <thead>
+                    <tr className="border-b-2 border-azul/20 font-display text-sm text-azul">
+                      <th className="px-3 py-2">#</th>
+                      <th className="px-3 py-2">Alumno</th>
+                      <th className="px-3 py-2 text-right">Puntos</th>
+                      <th className="px-3 py-2 text-right">Misiones</th>
+                      <th className="px-3 py-2 text-right">Ejercicios</th>
+                      <th className="px-3 py-2 text-right">Precisión</th>
+                      <th className="px-3 py-2 text-right">Último ingreso</th>
+                      <th className="px-3 py-2" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {students.map((s, i) => {
+                      const expanded = expandedId === s.id;
+                      return (
+                        <>
+                          <motion.tr
+                            key={s.id}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: Math.min(i * 0.04, 0.6) }}
+                            className={`cursor-pointer border-b border-tinta/10 transition-colors hover:bg-cielo/40 ${
+                              isToday(s.last_active) ? "bg-exito/5" : ""
+                            } ${expanded ? "bg-cielo/20" : ""}`}
+                            onClick={() => setExpandedId(expanded ? null : s.id)}
+                          >
+                            <td className="px-3 py-2.5 font-display font-bold text-tinta">
+                              {MEDALS[i] ?? i + 1}
+                            </td>
+                            <td className="px-3 py-2.5 font-semibold text-tinta">{s.name}</td>
+                            <td className="px-3 py-2.5 text-right font-display font-bold text-azul">
+                              {s.points}
+                            </td>
+                            <td className="px-3 py-2.5 text-right text-tinta/80">{s.missions}</td>
+                            <td className="px-3 py-2.5 text-right text-tinta/80">{s.exercises}</td>
+                            <td className="px-3 py-2.5 text-right text-tinta/80">
+                              {s.exercises > 0 ? Math.round((s.correct / s.exercises) * 100) : 0}%
+                            </td>
+                            <td className="px-3 py-2.5 text-right text-sm text-tinta/60">
+                              {formatLastActive(s.last_active)}
+                            </td>
+                            <td className="px-3 py-2.5 text-tinta/40">
+                              {expanded
+                                ? <ChevronUp className="h-4 w-4" />
+                                : <ChevronDown className="h-4 w-4" />}
+                            </td>
+                          </motion.tr>
+                          <AnimatePresence>
+                            {expanded && <StudentDetail key={`${s.id}-d`} student={s} />}
+                          </AnimatePresence>
+                        </>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </>
       )}
