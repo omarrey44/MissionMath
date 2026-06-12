@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   RefreshCw, Trophy, Users, CalendarCheck,
-  ChevronDown, ChevronUp, Clock,
+  ChevronDown, ChevronUp, Clock, Trash2,
 } from "lucide-react";
 import type { StudentRow } from "@/lib/db";
 import { useProgress } from "@/lib/store";
@@ -179,6 +179,32 @@ export function TeacherRanking() {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [status, setStatus] = useState<Status>("loading");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [resetConfirm, setResetConfirm] = useState(0); // 0 = idle, 1 = first tap, 2 = done
+  const [resetting, setResetting] = useState(false);
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function handleReset() {
+    if (resetConfirm === 0) {
+      setResetConfirm(1);
+      resetTimer.current = setTimeout(() => setResetConfirm(0), 4000);
+      return;
+    }
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+    setResetting(true);
+    try {
+      const res = await fetch("/api/reset", {
+        method: "DELETE",
+        headers: { "x-teacher-user": useProgress.getState().teacherUser },
+      });
+      if (res.ok) {
+        setStudents([]);
+        setResetConfirm(2);
+        setTimeout(() => setResetConfirm(0), 3000);
+      }
+    } finally {
+      setResetting(false);
+    }
+  }
 
   const load = useCallback(async () => {
     setStatus("loading");
@@ -211,10 +237,26 @@ export function TeacherRanking() {
         <h2 id="ranking-title" className="font-display text-xl font-bold text-tinta">
           🏆 Ranking de alumnos
         </h2>
-        <button onClick={load} className="btn-ghost no-print text-sm" disabled={status === "loading"}>
-          <RefreshCw className={`h-4 w-4 ${status === "loading" ? "animate-spin" : ""}`} aria-hidden="true" />
-          Actualizar
-        </button>
+        <div className="flex gap-2">
+          <button onClick={load} className="btn-ghost no-print text-sm" disabled={status === "loading"}>
+            <RefreshCw className={`h-4 w-4 ${status === "loading" ? "animate-spin" : ""}`} aria-hidden="true" />
+            Actualizar
+          </button>
+          <button
+            onClick={handleReset}
+            disabled={resetting}
+            className={`no-print flex items-center gap-1.5 rounded-2xl px-4 py-2 font-display text-sm font-bold transition-colors ${
+              resetConfirm === 2
+                ? "bg-exito/15 text-exito"
+                : resetConfirm === 1
+                  ? "bg-error text-white"
+                  : "text-error/70 hover:bg-error/10 hover:text-error"
+            }`}
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+            {resetConfirm === 2 ? "¡Listo!" : resetConfirm === 1 ? "¿Borrar todo? Confirmar" : "Reiniciar temporada"}
+          </button>
+        </div>
       </div>
 
       {status === "unconfigured" && (
