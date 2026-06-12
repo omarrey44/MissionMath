@@ -22,6 +22,7 @@ export async function GET(request: Request) {
   const { data, error } = await db
     .from("students")
     .select("id,name,points,stars,missions,exercises,correct,streak,last_active,extra")
+    .neq("name", "__reset__")
     .order("points", { ascending: false })
     .limit(200);
 

@@ -39,6 +39,8 @@ interface ProgressState {
   missionTimes: Record<string, number>;
   /** Last vacation week for which the welcome modal was shown. */
   lastWelcomedWeek: number;
+  /** ISO timestamp of the last season reset acknowledged by this device. */
+  lastSeasonReset: string;
 
   setName: (name: string) => void;
   setTeacherUser: (user: string) => void;
@@ -51,6 +53,7 @@ interface ProgressState {
   clearMission: (key: string) => void;
   saveMissionTime: (key: string, seconds: number) => void;
   setWelcomedWeek: (week: number) => void;
+  setLastSeasonReset: (iso: string) => void;
   /**
    * Clears the local session so another student can use this device.
    * The previous student's progress stays in the ranking DB.
@@ -119,6 +122,7 @@ const initialState = {
   missionSaves: {} as Record<string, MissionSave>,
   missionTimes: {} as Record<string, number>,
   lastWelcomedWeek: 0,
+  lastSeasonReset: "",
 };
 
 export const useProgress = create<ProgressState>()(
@@ -135,6 +139,7 @@ export const useProgress = create<ProgressState>()(
       setTeacherUser: (user) => set({ teacherUser: user.trim() }),
       setWeek: (week) => set({ currentWeek: week }),
       setWelcomedWeek: (week) => set({ lastWelcomedWeek: week }),
+      setLastSeasonReset: (iso) => set({ lastSeasonReset: iso }),
 
       recordAnswer: (topic, correct, points) => {
         const s = get();

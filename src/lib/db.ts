@@ -6,6 +6,9 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
  * Returns null when the env vars are not configured, so the app can run
  * without a database (ranking simply shows a setup notice).
  */
+/** Sentinel row ID used to track the last season reset timestamp. */
+export const RESET_SENTINEL_ID = "00000000-0000-0000-0000-000000000001";
+
 export function getDb(): SupabaseClient | null {
   // Accept both names so an existing NEXT_PUBLIC_ var also works
   const url =

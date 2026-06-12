@@ -28,14 +28,14 @@ function buildPayload(s: ReturnType<typeof useProgress.getState>) {
 }
 
 /**
- * Invisible component that keeps the ranking DB up to date:
- * - one sync on load (registers "the student entered today")
- * - debounced sync whenever progress changes
- * Fire-and-forget: failures never affect the student experience.
+ * Invisible component that keeps the ranking DB up to date.
+ * On mount it checks the season sentinel; if a reset happened after this
+ * device last acknowledged it, local progress is wiped before syncing.
  */
 export function ProgressSync() {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const syncedOnLoad = useRef(false);
+  const seasonChecked = useRef(false);
 
   useEffect(() => {
     function send() {
@@ -48,19 +48,41 @@ export function ProgressSync() {
       }).catch(() => {});
     }
 
-    // Initial sync once the persisted state is hydrated
+    async function checkSeasonThenSync() {
+      if (seasonChecked.current) return;
+      seasonChecked.current = true;
+      try {
+        const res = await fetch("/api/season", { cache: "no-store" });
+        if (res.ok) {
+          const { resetAt } = await res.json() as { resetAt: string | null };
+          if (resetAt) {
+            const s = useProgress.getState();
+            const lastReset = s.lastSeasonReset;
+            if (!lastReset || new Date(resetAt) > new Date(lastReset)) {
+              // A reset happened after this device last acknowledged it
+              useProgress.getState().resetProgress();
+              useProgress.getState().setLastSeasonReset(resetAt);
+              return; // Don't sync — local was just wiped
+            }
+          }
+        }
+      } catch {
+        // Season check failing is non-fatal — proceed normally
+      }
+      send();
+    }
+
     const tryInitial = () => {
       const s = useProgress.getState();
       if (s.hasHydrated && !syncedOnLoad.current) {
         syncedOnLoad.current = true;
-        send();
+        checkSeasonThenSync();
       }
     };
     tryInitial();
 
     const unsubscribe = useProgress.subscribe((state, prev) => {
       tryInitial();
-      // Only sync when progress-relevant fields change
       if (
         state.points === prev.points &&
         state.stars === prev.stars &&

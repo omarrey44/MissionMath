@@ -197,6 +197,11 @@ export function TeacherRanking() {
         headers: { "x-teacher-user": useProgress.getState().teacherUser },
       });
       if (res.ok) {
+        const { resetAt } = await res.json() as { resetAt: string };
+        // Clear this device's local progress and mark season as reset
+        const store = useProgress.getState();
+        store.resetProgress();
+        store.setLastSeasonReset(resetAt);
         setStudents([]);
         setResetConfirm(2);
         setTimeout(() => setResetConfirm(0), 3000);
