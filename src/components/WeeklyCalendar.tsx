@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Lock, CheckCircle2, Play, Star } from "lucide-react";
 import { DAYS, TOTAL_WEEKS, WEEK_DESCRIPTIONS } from "@/lib/data";
-import { todayWeekdayIndex } from "@/lib/date";
+import { todayWeekdayIndex, currentWeekFromDate } from "@/lib/date";
 import { useProgress } from "@/lib/store";
 
 type DayStatus = "locked" | "available" | "completed";
@@ -12,6 +13,12 @@ type DayStatus = "locked" | "available" | "completed";
 export function WeeklyCalendar() {
   const { completedDays, missionSaves, currentWeek, setWeek, hasHydrated } =
     useProgress();
+
+  // Auto-select the real calendar week on first render
+  useEffect(() => {
+    setWeek(currentWeekFromDate(TOTAL_WEEKS));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Only today's mission (real calendar date) is available; past and
   // future days stay locked. On weekends there is no daily mission.

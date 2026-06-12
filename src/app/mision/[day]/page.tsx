@@ -10,7 +10,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { CompletionModal } from "@/components/CompletionModal";
 import { generateMission, generateExercise, difficultyForWeek } from "@/lib/generators";
 import { BADGES, DAYS, TOPIC_LABELS, TOPIC_EMOJIS } from "@/lib/data";
-import { todayWeekdayIndex } from "@/lib/date";
+import { todayWeekdayIndex, currentWeekFromDate } from "@/lib/date";
 import { useProgress } from "@/lib/store";
 import type { Difficulty, Exercise } from "@/lib/types";
 
@@ -34,7 +34,6 @@ export default function MissionPage({ params }: { params: { day: string } }) {
   if (!day) notFound();
 
   const {
-    currentWeek,
     recordAnswer,
     completeMission,
     missionSaves,
@@ -42,6 +41,9 @@ export default function MissionPage({ params }: { params: { day: string } }) {
     clearMission,
     hasHydrated,
   } = useProgress();
+
+  // Always use the real calendar week — not the manually viewed week
+  const currentWeek = currentWeekFromDate();
 
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const [exercises, setExercises] = useState<Exercise[]>([]);
