@@ -55,7 +55,11 @@ export function ProgressSync() {
         const res = await fetch("/api/season", { cache: "no-store" });
         if (res.ok) {
           const { resetAt } = await res.json() as { resetAt: string | null };
-          console.log("[ProgressSync] season check →", { resetAt, lastSeasonReset: useProgress.getState().lastSeasonReset, studentName: useProgress.getState().studentName });
+          const s0 = useProgress.getState();
+          console.log("[ProgressSync] season check →", { resetAt, lastSeasonReset: s0.lastSeasonReset, studentName: s0.studentName });
+          const lsRaw = localStorage.getItem("mision-matematica");
+          const lsParsed = lsRaw ? JSON.parse(lsRaw) : null;
+          console.log("[ProgressSync] localStorage.lastSeasonReset =", lsParsed?.state?.lastSeasonReset ?? "(missing)");
           if (resetAt) {
             const s = useProgress.getState();
             const lastReset = s.lastSeasonReset;
@@ -67,8 +71,10 @@ export function ProgressSync() {
             }
             if (!lastReset || needsReset) {
               useProgress.getState().setLastSeasonReset(resetAt);
+              console.log("[ProgressSync] setLastSeasonReset done →", useProgress.getState().lastSeasonReset);
+              console.log("[ProgressSync] localStorage after set =", JSON.parse(localStorage.getItem("mision-matematica") ?? "{}").state?.lastSeasonReset);
             }
-            if (needsReset) return; // Don't sync — local was just wiped
+            if (needsReset) return;
           }
         }
       } catch (e) {
