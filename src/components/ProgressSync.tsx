@@ -58,12 +58,15 @@ export function ProgressSync() {
           if (resetAt) {
             const s = useProgress.getState();
             const lastReset = s.lastSeasonReset;
-            if (!lastReset || new Date(resetAt) > new Date(lastReset)) {
-              // A reset happened after this device last acknowledged it
+            const needsReset =
+              !!s.studentName && (!lastReset || new Date(resetAt) > new Date(lastReset));
+            if (needsReset) {
               useProgress.getState().resetProgress();
-              useProgress.getState().setLastSeasonReset(resetAt);
-              return; // Don't sync — local was just wiped
             }
+            if (!lastReset || needsReset) {
+              useProgress.getState().setLastSeasonReset(resetAt);
+            }
+            if (needsReset) return; // Don't sync — local was just wiped
           }
         }
       } catch {

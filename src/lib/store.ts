@@ -222,7 +222,8 @@ export const useProgress = create<ProgressState>()(
           teacherUser: s.teacherUser,
         })),
 
-      resetProgress: () => set({ ...initialState, hasHydrated: true }),
+      resetProgress: () =>
+        set((s) => ({ ...initialState, hasHydrated: true, lastSeasonReset: s.lastSeasonReset })),
       setHydrated: () => set({ hasHydrated: true }),
     }),
     {
