@@ -197,6 +197,7 @@ export const useProgress = create<ProgressState>()(
           ...initialState,
           hasHydrated: true,
           teacherUser: s.teacherUser,
+          lastSeasonReset: s.lastSeasonReset,
           studentId: row.id,
           studentName: row.name,
           points: row.points,
@@ -218,8 +219,8 @@ export const useProgress = create<ProgressState>()(
         set((s) => ({
           ...initialState,
           hasHydrated: true,
-          // Teacher session belongs to the device, not the student
           teacherUser: s.teacherUser,
+          lastSeasonReset: s.lastSeasonReset,
         })),
 
       resetProgress: () =>
