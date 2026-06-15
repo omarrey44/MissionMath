@@ -124,7 +124,7 @@ export default function PracticePage() {
           key={exercise.id}
           exercise={exercise}
           onResult={(correct) => {
-            recordAnswer(exercise.topic, correct, POINTS[difficulty]);
+            recordAnswer(exercise.topic, correct, POINTS[difficulty], false);
             if (correct) setSolvedCount((c) => c + 1);
           }}
           onContinue={next}

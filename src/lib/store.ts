@@ -45,8 +45,9 @@ interface ProgressState {
   setName: (name: string) => void;
   setTeacherUser: (user: string) => void;
   setWeek: (week: number) => void;
-  /** Records an answered exercise. Returns the ids of badges unlocked right now. */
-  recordAnswer: (topic: Topic, correct: boolean, points: number) => string[];
+  /** Records an answered exercise. Returns the ids of badges unlocked right now.
+   *  Pass countPoints=false (practice mode) to skip point gain/loss. */
+  recordAnswer: (topic: Topic, correct: boolean, points: number, countPoints?: boolean) => string[];
   /** Marks a mission complete and awards stars. Returns newly unlocked badge ids. */
   completeMission: (week: number, daySlug: string, stars: number) => string[];
   saveMission: (key: string, save: MissionSave) => void;
@@ -141,7 +142,7 @@ export const useProgress = create<ProgressState>()(
       setWelcomedWeek: (week) => set({ lastWelcomedWeek: week }),
       setLastSeasonReset: (iso) => set({ lastSeasonReset: iso }),
 
-      recordAnswer: (topic, correct, points) => {
+      recordAnswer: (topic, correct, points, countPoints = true) => {
         const s = get();
         const today = todayKey();
         let streak = s.streak;
@@ -155,8 +156,9 @@ export const useProgress = create<ProgressState>()(
         const next = {
           exercisesSolved: s.exercisesSolved + 1,
           correctAnswers: s.correctAnswers + (correct ? 1 : 0),
-          // Wrong answers cost points, but the total never goes below zero
-          points: Math.max(0, s.points + (correct ? points : -WRONG_PENALTY)),
+          points: countPoints
+            ? Math.max(0, s.points + (correct ? points : -WRONG_PENALTY))
+            : s.points,
           topicCorrect,
           streak,
           lastActiveDate: today,
