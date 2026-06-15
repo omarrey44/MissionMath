@@ -55,11 +55,13 @@ export function ProgressSync() {
         const res = await fetch("/api/season", { cache: "no-store" });
         if (res.ok) {
           const { resetAt } = await res.json() as { resetAt: string | null };
+          console.log("[ProgressSync] season check →", { resetAt, lastSeasonReset: useProgress.getState().lastSeasonReset, studentName: useProgress.getState().studentName });
           if (resetAt) {
             const s = useProgress.getState();
             const lastReset = s.lastSeasonReset;
             const needsReset =
               !!s.studentName && (!lastReset || new Date(resetAt) > new Date(lastReset));
+            console.log("[ProgressSync] needsReset:", needsReset);
             if (needsReset) {
               useProgress.getState().resetProgress();
             }
@@ -69,8 +71,8 @@ export function ProgressSync() {
             if (needsReset) return; // Don't sync — local was just wiped
           }
         }
-      } catch {
-        // Season check failing is non-fatal — proceed normally
+      } catch (e) {
+        console.warn("[ProgressSync] season check failed:", e);
       }
       send();
     }
