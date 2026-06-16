@@ -154,8 +154,8 @@ export const useProgress = create<ProgressState>()(
           topicCorrect[topic] = (topicCorrect[topic] ?? 0) + 1;
         }
         const next = {
-          exercisesSolved: s.exercisesSolved + 1,
-          correctAnswers: s.correctAnswers + (correct ? 1 : 0),
+          exercisesSolved: countPoints ? s.exercisesSolved + 1 : s.exercisesSolved,
+          correctAnswers: countPoints ? s.correctAnswers + (correct ? 1 : 0) : s.correctAnswers,
           points: countPoints
             ? Math.max(0, s.points + (correct ? points : -WRONG_PENALTY))
             : s.points,
