@@ -41,6 +41,22 @@ export async function POST(request: Request) {
     if (raw.length <= 80_000) extra = body.extra;
   }
 
+  // Check for an unacknowledged admin override before writing
+  const clientLastOverrideAt = (body.extra as Record<string, unknown>)?.lastOverrideAt as string ?? "";
+  const { data: existing } = await db
+    .from("students")
+    .select("id,name,points,stars,missions,exercises,correct,streak,last_active,extra")
+    .eq("id", id)
+    .maybeSingle();
+  if (existing) {
+    const dbOverrideAt = (existing.extra as Record<string, unknown>)?.overrideAt as string ?? "";
+    if (dbOverrideAt && (!clientLastOverrideAt || new Date(dbOverrideAt) > new Date(clientLastOverrideAt))) {
+      // Admin edit pending — update only last_active, return override to client
+      await db.from("students").update({ last_active: new Date().toISOString() }).eq("id", id);
+      return NextResponse.json({ ok: true, override: existing });
+    }
+  }
+
   const row = {
     id,
     name,

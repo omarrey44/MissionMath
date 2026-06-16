@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   RefreshCw, Trophy, Users, CalendarCheck,
-  ChevronDown, ChevronUp, Clock, Trash2,
+  ChevronDown, ChevronUp, Clock, Trash2, Pencil, X, Check,
 } from "lucide-react";
 import type { StudentRow } from "@/lib/db";
 import { useProgress } from "@/lib/store";
@@ -111,12 +111,107 @@ function StudentDetail({ student }: { student: StudentRow }) {
   );
 }
 
+// ── Edit modal ────────────────────────────────────────────────────────────────
+function EditStudentModal({ student, onClose, onSaved }: {
+  student: StudentRow;
+  onClose: () => void;
+  onSaved: (id: string, points: number, stars: number) => void;
+}) {
+  const [points, setPoints] = useState(student.points);
+  const [stars, setStars] = useState(student.stars);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSave() {
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch("/api/student", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-teacher-user": useProgress.getState().teacherUser,
+        },
+        body: JSON.stringify({ id: student.id, points, stars }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        setError(d.error ?? "Error al guardar");
+        return;
+      }
+      onSaved(student.id, points, stars);
+      onClose();
+    } catch {
+      setError("Sin conexión");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-tinta/50 p-4 backdrop-blur-sm" onClick={onClose}>
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        className="card w-full max-w-sm p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-lg font-bold text-tinta">
+            Editar — {student.name}
+          </h3>
+          <button onClick={onClose} className="text-tinta/40 hover:text-tinta">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="mt-4 flex flex-col gap-3">
+          <label className="flex items-center justify-between gap-3">
+            <span className="font-display text-sm font-bold text-tinta">Puntos</span>
+            <input
+              type="number"
+              min={0}
+              value={points}
+              onChange={(e) => setPoints(Math.max(0, Number(e.target.value)))}
+              className="w-28 rounded-xl border-2 border-azul/30 bg-cielo/50 px-3 py-2 text-right font-display font-bold text-azul outline-none focus:border-azul"
+            />
+          </label>
+          <label className="flex items-center justify-between gap-3">
+            <span className="font-display text-sm font-bold text-tinta">Estrellas</span>
+            <input
+              type="number"
+              min={0}
+              value={stars}
+              onChange={(e) => setStars(Math.max(0, Number(e.target.value)))}
+              className="w-28 rounded-xl border-2 border-azul/30 bg-cielo/50 px-3 py-2 text-right font-display font-bold text-azul outline-none focus:border-azul"
+            />
+          </label>
+        </div>
+        {error && <p className="mt-2 text-sm text-error">{error}</p>}
+        <div className="mt-5 flex gap-2">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="btn-primary flex-1"
+          >
+            {saving ? "Guardando…" : <><Check className="h-4 w-4" /> Guardar</>}
+          </button>
+          <button onClick={onClose} className="btn-ghost">Cancelar</button>
+        </div>
+        <p className="mt-3 text-center text-xs text-tinta/40">
+          El alumno verá los nuevos valores al abrir la app.
+        </p>
+      </motion.div>
+    </div>
+  );
+}
+
 // ── Mobile card ───────────────────────────────────────────────────────────────
-function StudentCard({ student, rank, expanded, onToggle }: {
+function StudentCard({ student, rank, expanded, onToggle, onEdit }: {
   student: StudentRow;
   rank: number;
   expanded: boolean;
   onToggle: () => void;
+  onEdit: () => void;
 }) {
   return (
     <motion.div
@@ -149,14 +244,22 @@ function StudentCard({ student, rank, expanded, onToggle }: {
         <span>🔥 {student.streak}</span>
       </div>
 
-      {/* Expand button */}
-      <button
-        onClick={onToggle}
-        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-cielo py-2 font-display text-sm font-bold text-azul transition-colors hover:bg-azul/10"
-      >
-        {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        {expanded ? "Ocultar detalle" : "Ver historial"}
-      </button>
+      {/* Action buttons */}
+      <div className="mt-3 flex gap-2">
+        <button
+          onClick={onToggle}
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-cielo py-2 font-display text-sm font-bold text-azul transition-colors hover:bg-azul/10"
+        >
+          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          {expanded ? "Ocultar" : "Ver historial"}
+        </button>
+        <button
+          onClick={onEdit}
+          className="flex items-center gap-1 rounded-xl bg-cielo px-3 py-2 font-display text-sm font-bold text-tinta/60 transition-colors hover:bg-azul/10 hover:text-azul"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+      </div>
 
       <AnimatePresence>
         {expanded && (
@@ -179,9 +282,17 @@ export function TeacherRanking() {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [status, setStatus] = useState<Status>("loading");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [editingStudent, setEditingStudent] = useState<StudentRow | null>(null);
   const [resetConfirm, setResetConfirm] = useState(0); // 0 = idle, 1 = first tap, 2 = done
   const [resetting, setResetting] = useState(false);
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleSaved(id: string, points: number, stars: number) {
+    setStudents((prev) =>
+      prev.map((s) => s.id === id ? { ...s, points, stars } : s)
+        .sort((a, b) => b.points - a.points)
+    );
+  }
 
   async function handleReset() {
     if (resetConfirm === 0) {
@@ -237,6 +348,7 @@ export function TeacherRanking() {
   }
 
   return (
+    <>
     <section className="card p-6" aria-labelledby="ranking-title">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="ranking-title" className="font-display text-xl font-bold text-tinta">
@@ -320,6 +432,7 @@ export function TeacherRanking() {
                     rank={i}
                     expanded={expandedId === s.id}
                     onToggle={() => toggle(s.id)}
+                    onEdit={() => setEditingStudent(s)}
                   />
                 ))}
               </div>
@@ -364,8 +477,17 @@ export function TeacherRanking() {
                             <td className="px-3 py-2.5 text-right text-tinta/80">{s.exercises}</td>
                             <td className="px-3 py-2.5 text-right text-tinta/80">{accuracy(s)}%</td>
                             <td className="px-3 py-2.5 text-right text-sm text-tinta/60">{formatLastActive(s.last_active)}</td>
-                            <td className="px-3 py-2.5 text-tinta/40">
-                              {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            <td className="px-3 py-2.5">
+                              <div className="flex items-center gap-1.5">
+                                {expanded ? <ChevronUp className="h-4 w-4 text-tinta/40" /> : <ChevronDown className="h-4 w-4 text-tinta/40" />}
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setEditingStudent(s); }}
+                                  className="rounded-lg p-1 text-tinta/30 hover:bg-azul/10 hover:text-azul"
+                                  title="Editar puntos"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </motion.tr>
                           <AnimatePresence>
@@ -393,5 +515,14 @@ export function TeacherRanking() {
         </>
       )}
     </section>
+
+      {editingStudent && (
+        <EditStudentModal
+          student={editingStudent}
+          onClose={() => setEditingStudent(null)}
+          onSaved={handleSaved}
+        />
+      )}
+  </>
   );
 }

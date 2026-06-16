@@ -23,6 +23,7 @@ function buildPayload(s: ReturnType<typeof useProgress.getState>) {
       currentWeek: s.currentWeek,
       missionSaves: s.missionSaves,
       missionTimes: s.missionTimes,
+      lastOverrideAt: s.lastOverrideAt,
     },
   };
 }
@@ -45,7 +46,16 @@ export function ProgressSync() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(buildPayload(s)),
-      }).catch(() => {});
+      })
+        .then((res) => res.ok ? res.json() : null)
+        .then((data) => {
+          if (data?.override) {
+            useProgress.getState().restoreStudent(data.override);
+            const at = (data.override.extra as Record<string, unknown>)?.overrideAt as string ?? "";
+            if (at) useProgress.getState().setLastOverrideAt(at);
+          }
+        })
+        .catch(() => {});
     }
 
     async function checkSeasonThenSync() {

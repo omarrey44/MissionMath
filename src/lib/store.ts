@@ -41,6 +41,8 @@ interface ProgressState {
   lastWelcomedWeek: number;
   /** ISO timestamp of the last season reset acknowledged by this device. */
   lastSeasonReset: string;
+  /** ISO timestamp of the last admin override acknowledged by this device. */
+  lastOverrideAt: string;
 
   setName: (name: string) => void;
   setTeacherUser: (user: string) => void;
@@ -55,6 +57,7 @@ interface ProgressState {
   saveMissionTime: (key: string, seconds: number) => void;
   setWelcomedWeek: (week: number) => void;
   setLastSeasonReset: (iso: string) => void;
+  setLastOverrideAt: (iso: string) => void;
   /**
    * Clears the local session so another student can use this device.
    * The previous student's progress stays in the ranking DB.
@@ -124,6 +127,7 @@ const initialState = {
   missionTimes: {} as Record<string, number>,
   lastWelcomedWeek: 0,
   lastSeasonReset: "",
+  lastOverrideAt: "",
 };
 
 export const useProgress = create<ProgressState>()(
@@ -141,6 +145,7 @@ export const useProgress = create<ProgressState>()(
       setWeek: (week) => set({ currentWeek: week }),
       setWelcomedWeek: (week) => set({ lastWelcomedWeek: week }),
       setLastSeasonReset: (iso) => set({ lastSeasonReset: iso }),
+      setLastOverrideAt: (iso) => set({ lastOverrideAt: iso }),
 
       recordAnswer: (topic, correct, points, countPoints = true) => {
         const s = get();
@@ -198,6 +203,7 @@ export const useProgress = create<ProgressState>()(
           hasHydrated: true,
           teacherUser: s.teacherUser,
           lastSeasonReset: s.lastSeasonReset,
+          lastOverrideAt: s.lastOverrideAt,
           studentId: row.id,
           studentName: row.name,
           points: row.points,
@@ -221,10 +227,11 @@ export const useProgress = create<ProgressState>()(
           hasHydrated: true,
           teacherUser: s.teacherUser,
           lastSeasonReset: s.lastSeasonReset,
+          lastOverrideAt: s.lastOverrideAt,
         })),
 
       resetProgress: () =>
-        set((s) => ({ ...initialState, hasHydrated: true, lastSeasonReset: s.lastSeasonReset })),
+        set((s) => ({ ...initialState, hasHydrated: true, lastSeasonReset: s.lastSeasonReset, lastOverrideAt: s.lastOverrideAt })),
       setHydrated: () => set({ hasHydrated: true }),
     }),
     {

@@ -34,3 +34,39 @@ export async function GET(request: Request) {
   }
   return NextResponse.json({ student: data ?? null });
 }
+
+/** Teacher-only: update a student's points/stars and stamp an overrideAt. */
+export async function PATCH(request: Request) {
+  const teacherUser = process.env.TEACHER_USER ?? "YukiCM";
+  if (request.headers.get("x-teacher-user") !== teacherUser) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const db = getDb();
+  if (!db) return NextResponse.json({ error: "Base de datos no configurada" }, { status: 503 });
+
+  let body: Record<string, unknown>;
+  try { body = await request.json(); } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+  }
+
+  const { id, points, stars } = body;
+  if (typeof id !== "string" || !id) {
+    return NextResponse.json({ error: "Falta id" }, { status: 400 });
+  }
+
+  const { data: current, error: fetchErr } = await db
+    .from("students").select("extra").eq("id", id).single();
+  if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 });
+
+  const overrideAt = new Date().toISOString();
+  const newExtra = { ...(current?.extra ?? {}), overrideAt };
+  const updates: Record<string, unknown> = { extra: newExtra };
+  if (typeof points === "number" && points >= 0) updates.points = Math.floor(points);
+  if (typeof stars === "number" && stars >= 0) updates.stars = Math.floor(stars);
+
+  const { error } = await db.from("students").update(updates).eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ ok: true, overrideAt });
+}
