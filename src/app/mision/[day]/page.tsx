@@ -8,7 +8,7 @@ import { ArrowLeft, Rocket } from "lucide-react";
 import { ExerciseCard } from "@/components/ExerciseCard";
 import { ProgressBar } from "@/components/ProgressBar";
 import { CompletionModal } from "@/components/CompletionModal";
-import { generateMission, generateExercise, difficultyForWeek } from "@/lib/generators";
+import { generateMission, difficultyForWeek } from "@/lib/generators";
 import { BADGES, DAYS, TOPIC_LABELS, TOPIC_EMOJIS } from "@/lib/data";
 import { todayWeekdayIndex, currentWeekFromDate } from "@/lib/date";
 import { useProgress } from "@/lib/store";
@@ -36,6 +36,7 @@ export default function MissionPage({ params }: { params: { day: string } }) {
   const {
     recordAnswer,
     completeMission,
+    completedDays,
     missionSaves,
     saveMission,
     clearMission,
@@ -53,7 +54,6 @@ export default function MissionPage({ params }: { params: { day: string } }) {
   const [pointsEarned, setPointsEarned] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
   const [newBadgeIds, setNewBadgeIds] = useState<string[]>([]);
-  const [extraMode, setExtraMode] = useState(false);
 
   const saveKey = `w${currentWeek}-${day.slug}`;
   const restored = useRef(false);
@@ -108,19 +108,16 @@ export default function MissionPage({ params }: { params: { day: string } }) {
     const newPoints = pointsEarned + (correct ? POINTS[difficulty] : 0);
     if (correct) setPointsEarned(newPoints);
     if (badges.length) setNewBadgeIds((prev) => [...prev, ...badges]);
-    // Persist with step advanced so an answered exercise never repeats
-    if (!extraMode) {
-      saveMission(saveKey, {
-        difficulty,
-        exercises,
-        step: Math.min(step + 1, required - 1),
-        pointsEarned: newPoints,
-      });
-    }
+    saveMission(saveKey, {
+      difficulty,
+      exercises,
+      step: Math.min(step + 1, required - 1),
+      pointsEarned: newPoints,
+    });
   }
 
   function handleContinue() {
-    if (!extraMode && step === required - 1) {
+    if (step === required - 1) {
       clearMission(saveKey);
       if (missionStartTime.current) {
         const elapsed = Math.round((Date.now() - missionStartTime.current) / 1000);
@@ -131,21 +128,7 @@ export default function MissionPage({ params }: { params: { day: string } }) {
       setShowCompletion(true);
       return;
     }
-    nextExercise();
-  }
-
-  function nextExercise() {
-    setExercises((prev) => [
-      ...prev,
-      generateExercise(day!.topic, difficulty ?? difficultyForWeek(currentWeek)),
-    ]);
     setStep((s) => s + 1);
-  }
-
-  function keepPracticing() {
-    setShowCompletion(false);
-    setExtraMode(true);
-    nextExercise();
   }
 
   // Each mission can only be played on its real calendar day
@@ -192,6 +175,36 @@ export default function MissionPage({ params }: { params: { day: string } }) {
         aria-busy="true"
         aria-label="Cargando misión"
       />
+    );
+  }
+
+  // ---------- already completed screen ----------
+  if (completedDays[saveKey]) {
+    return (
+      <div className="mx-auto flex max-w-2xl flex-col gap-6">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card p-8 text-center"
+        >
+          <span className="text-5xl" aria-hidden="true">⭐</span>
+          <h1 className="mt-3 font-display text-2xl font-bold text-tinta">
+            ¡Ya completaste la misión de hoy!
+          </h1>
+          <p className="mt-2 text-tinta/70">
+            Vuelve mañana para la siguiente misión. Mientras tanto, puedes practicar libremente.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link href="/practicar" className="btn-primary">
+              Practicar libremente
+            </Link>
+            <Link href="/" className="btn-ghost">
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Volver al calendario
+            </Link>
+          </div>
+        </motion.div>
+      </div>
     );
   }
 
@@ -287,27 +300,17 @@ export default function MissionPage({ params }: { params: { day: string } }) {
         </span>
       </div>
 
-      {!extraMode ? (
-        <div className="card p-5">
-          <ProgressBar
-            value={Math.min(step + (showCompletion ? 1 : 0), required)}
-            max={required}
-            label={
-              current
-                ? `Misión de hoy — ${TOPIC_EMOJIS[current.topic]} ${TOPIC_LABELS[current.topic]}`
-                : "Misión de hoy"
-            }
-          />
-        </div>
-      ) : (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="card bg-exito/10 p-4 text-center font-display font-bold text-exito"
-        >
-          ✅ Misión cumplida — ¡sigue practicando para ganar más puntos!
-        </motion.p>
-      )}
+      <div className="card p-5">
+        <ProgressBar
+          value={Math.min(step + (showCompletion ? 1 : 0), required)}
+          max={required}
+          label={
+            current
+              ? `Misión de hoy — ${TOPIC_EMOJIS[current.topic]} ${TOPIC_LABELS[current.topic]}`
+              : "Misión de hoy"
+          }
+        />
+      </div>
 
       {current ? (
         <AnimatePresence mode="wait">
@@ -316,9 +319,7 @@ export default function MissionPage({ params }: { params: { day: string } }) {
             exercise={current}
             onResult={handleResult}
             onContinue={handleContinue}
-            continueLabel={
-              !extraMode && step === required - 1 ? "¡Terminar misión!" : "Continuar"
-            }
+            continueLabel={step === required - 1 ? "¡Terminar misión!" : "Continuar"}
           />
         </AnimatePresence>
       ) : (
@@ -334,7 +335,6 @@ export default function MissionPage({ params }: { params: { day: string } }) {
         pointsEarned={pointsEarned}
         starsEarned={STARS_PER_MISSION}
         newBadges={newBadges}
-        onKeepPracticing={keepPracticing}
       />
     </div>
   );

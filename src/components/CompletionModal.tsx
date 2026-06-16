@@ -12,7 +12,6 @@ interface CompletionModalProps {
   pointsEarned: number;
   starsEarned: number;
   newBadges: { name: string; emoji: string }[];
-  onKeepPracticing: () => void;
 }
 
 export function CompletionModal({
@@ -20,7 +19,6 @@ export function CompletionModal({
   pointsEarned,
   starsEarned,
   newBadges,
-  onKeepPracticing,
 }: CompletionModalProps) {
   useEffect(() => {
     if (open) {
@@ -96,11 +94,11 @@ export function CompletionModal({
             )}
 
             <div className="mt-6 flex flex-col gap-3">
-              <button onClick={onKeepPracticing} className="btn-primary">
-                Seguir practicando 💪
-              </button>
-              <Link href="/" className="btn-ghost">
+              <Link href="/" className="btn-primary">
                 Volver al calendario
+              </Link>
+              <Link href="/practicar" className="btn-ghost">
+                Practicar libremente
               </Link>
             </div>
           </motion.div>
