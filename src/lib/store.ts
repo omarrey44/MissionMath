@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { BADGES, WRONG_PENALTY } from "./data";
-import { todayKey, yesterdayKey } from "./date";
+import { todayKey, previousSchoolDayKey } from "./date";
 import type { Difficulty, Exercise, Topic } from "./types";
 
 /** Snapshot of an unfinished daily mission so students can resume it. */
@@ -152,7 +152,10 @@ export const useProgress = create<ProgressState>()(
         const today = todayKey();
         let streak = s.streak;
         if (s.lastActiveDate !== today) {
-          streak = s.lastActiveDate === yesterdayKey() ? streak + 1 : 1;
+          // The streak survives as long as no school day was missed. Weekends
+          // don't count: on Monday the previous school day is Friday.
+          streak =
+            s.lastActiveDate >= previousSchoolDayKey(today) ? streak + 1 : 1;
         }
         const topicCorrect = { ...s.topicCorrect };
         if (correct) {

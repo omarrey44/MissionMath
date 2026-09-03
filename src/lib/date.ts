@@ -1,8 +1,8 @@
 /** All date logic uses the school's timezone so days roll over at local midnight. */
 export const TIMEZONE = "America/Chihuahua";
 
-/** First Monday of the season. Week 1 = August 31 – September 4 2026. */
-export const VACATION_START = "2026-08-31";
+/** First Monday of the season. Week 1 = September 7 – September 11 2026. */
+export const VACATION_START = "2026-09-07";
 
 /**
  * Returns which vacation week we are in (1-based).
@@ -22,9 +22,16 @@ export function todayKey(): string {
   return new Date().toLocaleDateString("en-CA", { timeZone: TIMEZONE });
 }
 
-export function yesterdayKey(): string {
-  const d = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  return d.toLocaleDateString("en-CA", { timeZone: TIMEZONE });
+/**
+ * Last school day before `key` (Monday–Friday only), as YYYY-MM-DD.
+ * Monday looks back to Friday, so a weekend never breaks a streak.
+ */
+export function previousSchoolDayKey(key: string = todayKey()): string {
+  const d = new Date(key + "T00:00:00");
+  do {
+    d.setDate(d.getDate() - 1);
+  } while (d.getDay() === 0 || d.getDay() === 6);
+  return d.toLocaleDateString("en-CA");
 }
 
 /** 0 = lunes … 4 = viernes, -1 = fin de semana. */
