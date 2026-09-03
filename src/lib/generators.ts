@@ -521,7 +521,7 @@ export function generateExercise(topic: Topic, difficulty: Difficulty): Exercise
   return generatorByTopic[topic](difficulty);
 }
 
-/** Difficulty curve: week 1 easy → week 4 mixed review. */
+/** Difficulty curve: week 1 easy, week 2 medium, weeks 3-8 hard. */
 export function difficultyForWeek(week: number): Difficulty {
   if (week <= 1) return "easy";
   if (week === 2) return "medium";

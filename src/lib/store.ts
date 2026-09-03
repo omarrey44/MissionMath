@@ -231,7 +231,14 @@ export const useProgress = create<ProgressState>()(
         })),
 
       resetProgress: () =>
-        set((s) => ({ ...initialState, hasHydrated: true, lastSeasonReset: s.lastSeasonReset, lastOverrideAt: s.lastOverrideAt })),
+        set((s) => ({
+          ...initialState,
+          hasHydrated: true,
+          // Keep the teacher signed in across a season reset
+          teacherUser: s.teacherUser,
+          lastSeasonReset: s.lastSeasonReset,
+          lastOverrideAt: s.lastOverrideAt,
+        })),
       setHydrated: () => set({ hasHydrated: true }),
     }),
     {

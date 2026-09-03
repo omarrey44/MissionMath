@@ -1,14 +1,14 @@
 /** All date logic uses the school's timezone so days roll over at local midnight. */
 export const TIMEZONE = "America/Chihuahua";
 
-/** First Monday of the vacation period. Week 1 = June 15 – June 19 2026. */
-export const VACATION_START = "2026-06-15";
+/** First Monday of the season. Week 1 = August 31 – September 4 2026. */
+export const VACATION_START = "2026-08-31";
 
 /**
  * Returns which vacation week we are in (1-based).
  * Before VACATION_START → 1 (preview). After last week → TOTAL_WEEKS.
  */
-export function currentWeekFromDate(totalWeeks = 4): number {
+export function currentWeekFromDate(totalWeeks = 8): number {
   const startMs = new Date(VACATION_START + "T00:00:00").getTime();
   const todayMs = new Date(todayKey() + "T00:00:00").getTime();
   const diffDays = Math.floor((todayMs - startMs) / (1000 * 60 * 60 * 24));

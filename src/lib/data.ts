@@ -43,13 +43,17 @@ export const DAYS: DayConfig[] = [
   },
 ];
 
-export const TOTAL_WEEKS = 4;
+export const TOTAL_WEEKS = 8;
 
 export const WEEK_DESCRIPTIONS: Record<number, string> = {
   1: "Suma, resta, tablas de multiplicar y división exacta",
   2: "Números más grandes, división con residuo y fracciones simples",
   3: "Decimales, operaciones mixtas y más problemas razonados",
   4: "Repaso con retos mixtos",
+  5: "Multiplicaciones y divisiones más largas",
+  6: "Fracciones y decimales combinados",
+  7: "Problemas razonados de varios pasos",
+  8: "Repaso final de toda la temporada",
 };
 
 export const TOPIC_LABELS: Record<Topic, string> = {

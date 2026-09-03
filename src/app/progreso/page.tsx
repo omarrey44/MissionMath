@@ -49,7 +49,7 @@ export default function ProgressPage() {
           <ProgressBar
             value={hasHydrated ? missionsDone : 0}
             max={totalMissions}
-            label="Misiones de las 4 semanas"
+            label={`Misiones de las ${TOTAL_WEEKS} semanas`}
           />
         </div>
         <p className="mt-3 text-sm text-tinta/60">
