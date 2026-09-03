@@ -7,6 +7,7 @@ import type { Exercise } from "@/lib/types";
 import { checkAnswer } from "@/lib/generators";
 import { CORRECT_MESSAGES, INCORRECT_MESSAGES, WRONG_PENALTY } from "@/lib/data";
 import { playSound } from "@/lib/sounds";
+import { OperationWalkthrough } from "@/components/OperationWalkthrough";
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -101,6 +102,8 @@ export function ExerciseCard({
       <p className="font-display text-2xl font-bold leading-snug text-tinta md:text-3xl">
         {exercise.question}
       </p>
+
+      {attempts > 0 && <OperationWalkthrough exercise={exercise} />}
 
       <form
         className="mt-6 flex flex-col gap-4"
